@@ -1,0 +1,57 @@
+from django.db import models, transaction, IntegrityError
+from django.contrib.auth.models import User
+import random, string
+from hashlib import md5
+from . import exceptions
+from uuid import uuid4
+
+def generate_unique_endpoint():
+    length = 8
+    characters = string.ascii_letters + string.digits
+    while True:
+        random_endpoint = ''.join(random.choices(characters, k=length))
+        if not Api.objects.filter(endpoint=random_endpoint).exists():
+            return random_endpoint
+
+def generate_api_hash(code, method):
+    target = "CODE:"+str(code)+"\nMETHOD:"+method
+    return md5(target.encode("utf-8")).hexdigest()
+
+
+class Api(models.Model):
+    # name = models.CharField(max_length=255)
+    endpoint = models.CharField(max_length=255, default=generate_unique_endpoint, unique=True)
+    method = models.CharField(max_length=255)
+    code = models.TextField()
+    api_hash = models.TextField(max_length=128, blank=True, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not self.endpoint:
+            self.endpoint = generate_unique_endpoint()
+        self.api_hash = generate_api_hash(self.code, self.method)
+        try:
+            with transaction.atomic():
+                super(Api, self).save(*args, **kwargs)
+        except IntegrityError as e:
+            if 'unique constraint' in str(e).lower():
+                raise exceptions.ApiHashConflict("API Hash Collision.") from e
+            else:
+                raise exceptions.GenericDBException("Something went wrong")
+
+def generate_unique_tableid():
+    while True:
+        uniqueId = uuid4()
+        if not Table.objects.filter(table_uuid=uniqueId).exists():
+            return uniqueId
+
+class Table(models.Model):
+    table_name = models.CharField(max_length=255)
+    table_uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
+    table_columns = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.table_name

@@ -1,0 +1,4 @@
+Requirement already satisfied: djangorestframework in /home/sawdust/venv/djangoenv/lib/python3.11/site-packages (3.15.2)
+Requirement already satisfied: django>=4.2 in /home/sawdust/venv/djangoenv/lib/python3.11/site-packages (from djangorestframework) (5.1.1)
+Requirement already satisfied: asgiref<4,>=3.8.1 in /home/sawdust/venv/djangoenv/lib/python3.11/site-packages (from django>=4.2->djangorestframework) (3.8.1)
+Requirement already satisfied: sqlparse>=0.3.1 in /home/sawdust/venv/djangoenv/lib/python3.11/site-packages (from django>=4.2->djangorestframework) (0.5.1)
