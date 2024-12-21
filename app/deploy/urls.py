@@ -1,7 +1,8 @@
 from django.urls import path, include
-from .views import ApiDeploy, ApiDelete, Tables
+from .views import ApiTest, ApiDeploy, ApiDelete, Tables
 
 urlpatterns = [
+    path('test', ApiTest.as_view(), name='test'),
     path('deploy', ApiDeploy.as_view(), name='deploy'),
     path('delete', ApiDelete.as_view(), name='delete'),
     path('tables/create', Tables.as_view(), name='create'),
