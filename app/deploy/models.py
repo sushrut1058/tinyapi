@@ -23,6 +23,7 @@ class Api(models.Model):
     endpoint = models.CharField(max_length=255, default=generate_unique_endpoint, unique=True)
     method = models.CharField(max_length=255)
     code = models.TextField()
+    content_type = models.CharField(max_length=255)
     api_hash = models.TextField(max_length=128, blank=True, unique=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

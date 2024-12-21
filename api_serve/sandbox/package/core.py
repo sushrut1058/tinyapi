@@ -1,11 +1,11 @@
 #there's no proper exception handling
 #table name needs to replaced in error messages
 import sqlite3
-from . import exceptions
-import table_dict
+import exceptions
+from table_dict import table_dict
 
 class Table:
-    def __init__(self,table_name: str, connection: sqlite3.Connection):
+    def __init__(self,table_name: str, connection: sqlite3.Connection = None):
         self.table_name = table_dict[table_name]
         self.connection = connection
 

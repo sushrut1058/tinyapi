@@ -2,13 +2,19 @@ package main
 
 import (
 	"encoding/json"
-	"io"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
+
+	"snaplet/api_serve/data"
+	"snaplet/api_serve/engine"
+
+	gin "github.com/gin-gonic/gin"
 )
 
-type CompileRequest struct {
-	Code string `json:"code"`
+type CompileResponse struct {
+	Response string `json:"response"`
 }
 
 /*
@@ -16,41 +22,88 @@ called from django script
 request: code
 response: output
 */
-func compileHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Invalid request method", http.StatusBadGateway)
-		return
+func compileHandler(c *gin.Context) {
+	var compileRequestBody struct {
+		Code    string `json:"code" binding:"required"`
+		Payload string `json:"payload" binding:"required"`
 	}
-	body, err := io.ReadAll(r.Body)
-	defer r.Body.Close()
-	if err != nil || len(body) == 0 {
-		http.Error(w, "No body to read", http.StatusBadRequest)
-		return
-	}
-	log.Println("Body:", string(body))
-	var requestBody CompileRequest
-
-	err = json.Unmarshal(body, &requestBody)
-
+	err := c.ShouldBindBodyWithJSON(&compileRequestBody)
 	if err != nil {
-		log.Println(err)
-		panic(err)
+		c.JSON(http.StatusBadRequest, gin.H{"message": "Invalid request"})
+		return
 	}
-	log.Println(requestBody.Code)
-
+	then := time.Now()
+	payload := data.Payload{}
+	response := engine.Run(compileRequestBody.Code, &payload)
+	log.Printf("Time taken for execution: %s", time.Since(then))
+	c.JSON(200, gin.H{"message": response})
 }
 
-/*
-called by user directly
-urlpattern: /api/<random_alphanum>
-body: can be anything in json, will be passed to the python script
-*/
-func serve(w http.ResponseWriter, r *http.Request) {
+func apiServe(c *gin.Context) {
+	endpoint := c.Param("random")
+	pathParams := c.Param("params")
+	queryParams := c.Request.URL.Query()
+	method := c.Request.Method
+	headers := make(map[string]interface{})
+
+	for key, value := range c.Request.Header {
+		headers[key] = value
+	}
+	//1.check with db for existence
+	status, code, content_type := GetEndpointInfo(endpoint, method)
+	if status != 200 {
+		c.JSON(status, gin.H{"message": "The endpoint you're trying to access doesn't exist"})
+		return
+	}
+	log.Print(c.GetHeader("Content-Type"))
+	if content_type != c.GetHeader("Content-Type") {
+		content_type = "plain/text"
+	}
+	var jsonData map[string]interface{}
+	var err error
+	if content_type == "application/json" {
+		//check if request body is valid json
+		err = c.ShouldBindJSON(&jsonData)
+
+	} else if content_type == "application/x-www-form-urlencoded" {
+		//extract body and create json then strign out of it
+		err = c.ShouldBind(&jsonData)
+	}
+	if err != nil {
+		c.JSON(400, gin.H{"message": "Invalid payload provided"})
+	}
+	jsonStr, err := json.Marshal(jsonData)
+	log.Printf("jsonStr: %v, pathParams: %v, queryParams: %v ", jsonStr, pathParams, queryParams)
+	log.Print(queryParams["dfs"])
+
+	payload := &data.Payload{
+		QueryParams: queryParams,
+		PathParams:  pathParams,
+		Method:      method,
+		Request: data.Request{
+			Body:   string(jsonStr),
+			Header: headers,
+		},
+	}
+	fmt.Printf("Payload: %v", payload)
+	fmt.Println(code)
+
+	//2.fetch and engine.run() with payload (queryparams, body, header)
+	response := engine.Run(code, payload)
+
+	//forward output
+	c.JSON(status, gin.H{"message": response})
 
 }
 
 func main() {
-	http.HandleFunc("/compile", compileHandler)
-	// http.HandleFunc("/api/")
-	http.ListenAndServe(":8080", nil)
+	DBConnect()
+	engine.Start()
+	defer engine.Stop()
+	defer DBDisconnect()
+	r := gin.Default()
+	r.POST("/compile", compileHandler)
+	r.Any("/api/:random/*params", apiServe)
+	r.Run()
+
 }
