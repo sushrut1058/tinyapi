@@ -14,11 +14,14 @@ payload = args.payload
 jsonObj = json.loads(payload)
 
 request = jsonObj['request']
-print(request)
-request['params'] = jsonObj["path_params"]
-request['query'] = jsonObj["query_params"]
-request['method'] = jsonObj["method"]
+request['params'] = jsonObj.get("path_params")
+request['query'] = jsonObj.get("query_params")
+request['method'] = jsonObj.get("method")
+r = jsonObj.get("request")
+request['body'] = r.get("body")
+request['header'] = r.get("header")
+# print("Payload Received in python script:\n", request)
 
-print("Payload Received in python script:\n", request)
+response = handle(request)
 
-handle(request)
+print(json.dumps(response))

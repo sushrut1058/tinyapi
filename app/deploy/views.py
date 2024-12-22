@@ -6,11 +6,50 @@ from rest_framework.views import APIView
 from django.http import JsonResponse
 from django.db import transaction, connections
 import json, re
+import requests
 
 from .models import Api,Table
 from .serializers import ApiSerializer, TableSerializer
 from . import exceptions
 from .base_api import TableBaseAPI
+import requests
+
+class ApiTest(APIView):
+    permission_classes=[AllowAny]
+    def post(self, request):
+        try:
+            url = "http://localhost:8080/compile"
+            # get code, request payload, parse and send            
+            new_request = {}
+            code = {}
+            print(request.data)
+            
+            print("obj:", request.data)
+            fwd_body = {}
+            fwd_body["code"] = request.data.get('code')
+            fwd_body["payload"] = request.data.get('payload')
+            if fwd_body["payload"]==None:
+                fwd_body["payload"] = {
+                    "query_params": {},
+                    "path_params": "",
+                    "method": "",
+                    "request":{
+                        "body":"",
+                        "header":{}
+                    }
+                }
+            print("Body:\n",json.dumps(fwd_body))
+            response = requests.post(url, data=json.dumps(fwd_body))
+            
+            return Response(response.json(), status=200)
+        except exceptions.ApiHashConflict:
+            return Response({"message":"Duplicate API found. Sorry, this feature is currently not supported"}, status=400)
+        except exceptions.GenericDBException:
+            return Response({"message":"Something went wrong and we're working on it. Please try again later."}, status=500)
+        # except Exception as e:
+        #     print(e)
+        #     return Response({"message":"Something went wrong and we're working on it. Please try again later.."}, status=500)
+
 
 class ApiDeploy(APIView):
     permission_classes=[AllowAny]
