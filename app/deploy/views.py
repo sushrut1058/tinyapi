@@ -11,20 +11,16 @@ import requests
 from .models import Api,Table
 from .serializers import ApiSerializer, TableSerializer
 from . import exceptions
-from .base_api import TableBaseAPI
+from .helper_api import TableHelper, ApiHelper
 import requests
 
-class ApiTest(APIView):
+class ApiTest(APIView, ApiHelper):
     permission_classes=[AllowAny]
     def post(self, request):
         try:
             url = "http://localhost:8080/compile"
-            # get code, request payload, parse and send            
-            new_request = {}
-            code = {}
-            print(request.data)
-            
-            print("obj:", request.data)
+            # get code, request payload, parse and send
+
             fwd_body = {}
             fwd_body["code"] = request.data.get('code')
             fwd_body["payload"] = request.data.get('payload')
@@ -35,10 +31,13 @@ class ApiTest(APIView):
                     "method": "",
                     "request":{
                         "body":"",
-                        "header":{}
+                        "headers":{}
                     }
                 }
-            print("Body:\n",json.dumps(fwd_body))
+            else:
+                path_params_raw = fwd_body["payload"].get("path_params")
+                fwd_body["payload"]["path_params"] = self.parsePathParams_test(path_params_raw)
+
             response = requests.post(url, data=json.dumps(fwd_body))
             
             return Response(response.json(), status=200)
@@ -46,9 +45,9 @@ class ApiTest(APIView):
             return Response({"message":"Duplicate API found. Sorry, this feature is currently not supported"}, status=400)
         except exceptions.GenericDBException:
             return Response({"message":"Something went wrong and we're working on it. Please try again later."}, status=500)
-        # except Exception as e:
-        #     print(e)
-        #     return Response({"message":"Something went wrong and we're working on it. Please try again later.."}, status=500)
+        except Exception as e:
+            print(e)
+            return Response({"message":"Something went wrong and we're working on it. Please try again later.."}, status=500)
 
 
 class ApiDeploy(APIView):
@@ -56,16 +55,21 @@ class ApiDeploy(APIView):
     
     def post(self, request):
         try:
-            serializer = ApiSerializer(data=request.data)
-            print("Data",serializer)
+            bodyObj = request.data['body']
+            # serializer = ApiSerializer(endpoint=bodyObj['endpoint'], method=bodyObj['method'], code=bodyObj['code'], api_data=bodyObj['api_data'])
+            serializer = ApiSerializer(data=bodyObj)
             if serializer.is_valid():
                 serializer.save()
                 return Response({"message":"Successfully initiated API deployment."})
+            else:
+                print(serializer.errors)
+                return Response({"message":"Failed to parse input data for api"}, 400)
         except exceptions.ApiHashConflict:
             return Response({"message":"Duplicate API found. Sorry, this feature is currently not supported"}, status=400)
         except exceptions.GenericDBException:
             return Response({"message":"Something went wrong and we're working on it. Please try again later."}, status=500)
         except Exception as e:
+            print(e)
             return Response({"message":"Something went wrong and we're working on it. Please try again later."}, status=500)
 
     def get(self, request):
@@ -87,7 +91,7 @@ class ApiDelete(APIView):
             print(e)
             return JsonResponse({"message":"Failed to delete endpoint"}, status=500)
 
-class Tables(APIView, TableBaseAPI):
+class Tables(APIView, TableHelper):
     permission_classes=[AllowAny]
     
     def get(self, request, table_name=None):
@@ -107,9 +111,7 @@ class Tables(APIView, TableBaseAPI):
                     return JsonResponse({"message":"No table with the given name could be found"}, status=400)
                 else:
                     #@todo: raise some internal flag
-                    return JsonResponse({"message":"Something went wrong"}, status=500)
-                
-                return JsonResponse({"message":"Mock Table Response, data here"}, status=200)
+                    return JsonResponse({"message":"Something went wrong"}, status=500)                
             except Exception as e:
                 print("Exception:", e)
                 return JsonResponse({"message":"Something went wrong while fetching the table, please try again after some time..."}, status=500)
@@ -117,7 +119,6 @@ class Tables(APIView, TableBaseAPI):
             try:
                 tables = Table.objects.all()
                 table_list = [{'name':item.table_name, 'schema':item.table_columns} for item in tables ]
-                # print(table_list)
                 return JsonResponse({"message":table_list}, status=200)
             except Exception as e:
                 print("Exception:", e)

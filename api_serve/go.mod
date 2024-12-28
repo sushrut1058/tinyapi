@@ -1,4 +1,4 @@
-module snaplet/api_serve
+module backpocket/api-serve
 
 go 1.22.7
 

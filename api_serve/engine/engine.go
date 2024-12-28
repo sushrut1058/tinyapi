@@ -2,17 +2,17 @@ package engine
 
 import (
 	"archive/tar"
+	"backpocket/api-serve/data"
 	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
-	"snaplet/api_serve/data"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/client"
+	"github.com/docker/docker/pkg/stdcopy"
 )
 
 var Client *client.Client
@@ -27,13 +27,14 @@ func Stop() {
 	Client.Close()
 }
 
-func Run(script string, payload *data.Payload) string {
+func Run(script string, payload *data.Payload) (string, string) {
 	copyScriptToContainer(script, ContainerID, payload)
 	return execute(ContainerID, payload)
 }
 
 func createEngine() {
 	var err error
+	user_tables_dbpath := "/home/sawdust/tiny-api/db/mount/:/app/db"
 	Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		panic(err)
@@ -42,7 +43,12 @@ func createEngine() {
 		Image: "sandbox",
 		Cmd:   []string{"sleep", "infinity"},
 	}
-	resp, err := Client.ContainerCreate(context.Background(), &containerConfig, nil, nil, nil, "worker")
+	hostConfig := container.HostConfig{
+		Binds: []string{
+			user_tables_dbpath,
+		},
+	}
+	resp, err := Client.ContainerCreate(context.Background(), &containerConfig, &hostConfig, nil, nil, "worker")
 	if err != nil {
 		panic(err)
 	}
@@ -50,7 +56,7 @@ func createEngine() {
 	log.Print("Container Created.")
 }
 
-func execute(containerID string, payload *data.Payload) string {
+func execute(containerID string, payload *data.Payload) (string, string) {
 	jsonObj, err := json.Marshal(payload)
 	if err != nil {
 		panic(err)
@@ -60,7 +66,7 @@ func execute(containerID string, payload *data.Payload) string {
 		Cmd:          []string{"python3", "package/main.py", "--payload", string(jsonObj)},
 		AttachStderr: true,
 		AttachStdout: true,
-		Tty:          true,
+		Tty:          false,
 	}
 	execIDResp, err := Client.ContainerExecCreate(context.Background(), containerID, *execConfig)
 	if err != nil {
@@ -68,15 +74,27 @@ func execute(containerID string, payload *data.Payload) string {
 	}
 	fmt.Println(execIDResp, execIDResp.ID)
 	attachResp, err := Client.ContainerExecAttach(context.Background(), execIDResp.ID, types.ExecStartCheck{Detach: false,
-		Tty: true,
+		Tty: false,
 	})
 	if err != nil {
 		panic(err)
 	}
 	defer attachResp.Close()
-	var buffer bytes.Buffer
-	io.Copy(&buffer, attachResp.Reader)
-	return buffer.String()
+	var stdoutBuffer, stderrBuffer bytes.Buffer
+	outputChan := make(chan error)
+	go func() {
+		_, err := stdcopy.StdCopy(&stdoutBuffer, &stderrBuffer, attachResp.Reader)
+		outputChan <- err
+		log.Print(err)
+	}()
+	if err := <-outputChan; err != nil {
+		panic(err)
+	}
+
+	return stdoutBuffer.String(), stderrBuffer.String()
+	// var buffer bytes.Buffer
+	// io.Copy(&buffer, attachResp.Reader)
+	// return buffer.String()
 }
 
 func copyScriptToContainer(script_string string, containerID string, payload *data.Payload) {

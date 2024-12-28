@@ -79,16 +79,17 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DB_DIR = BASE_DIR.parent / 'db'
+DB1_DIR = BASE_DIR.parent / 'db' / 'private'
+DB2_DIR = BASE_DIR.parent / 'db' / 'mount'
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DB_DIR / 'db.sqlite3',
+        'NAME': DB1_DIR / 'db.sqlite3',
     },
     'user_tables': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DB_DIR / 'user_tables.sqlite3',
+        'NAME': DB2_DIR / 'user_tables.sqlite3',
     }
 }
 

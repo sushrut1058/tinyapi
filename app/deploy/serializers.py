@@ -1,10 +1,21 @@
 from rest_framework import serializers
 from .models import Api, Table
+import json
 
 class ApiSerializer(serializers.ModelSerializer):
+    def to_internal_value(self, data):
+        if 'api_data' in data:
+            data['api_data'] = json.dumps(data['api_data'])
+        return super().to_internal_value(data)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        ret['api_data'] = json.loads(ret['api_data'])
+        return ret
+   
     class Meta:
         model = Api
-        fields = ['id', 'endpoint', 'content_type', 'method', 'code', 'created_at', 'updated_at']
+        fields = ['id', 'endpoint', 'api_data', 'method', 'code', 'created_at', 'updated_at']
 
 class TableSerializer(serializers.ModelSerializer):
     # table_uuid = serializers.UUIDField(format='canonical', read_only=True)

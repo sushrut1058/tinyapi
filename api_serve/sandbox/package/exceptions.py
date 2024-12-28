@@ -1,3 +1,0 @@
-
-class EmptyArgument(Exception):
-    pass
