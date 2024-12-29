@@ -16,3 +16,9 @@ type ApiData struct {
 	PathParams  []string `json:"path_params"`
 	ContentType string   `json:"content_type"`
 }
+
+type File struct {
+	Name string
+	Data []byte
+	Dest string
+}

@@ -28,7 +28,12 @@ func Stop() {
 }
 
 func Run(script string, payload *data.Payload) (string, string) {
-	copyScriptToContainer(script, ContainerID, payload)
+	file := data.File{
+		Name: "script.py",
+		Data: []byte(script),
+		Dest: "/app/package/",
+	}
+	CopyScriptToContainer(&file, ContainerID)
 	return execute(ContainerID, payload)
 }
 
@@ -97,18 +102,18 @@ func execute(containerID string, payload *data.Payload) (string, string) {
 	// return buffer.String()
 }
 
-func copyScriptToContainer(script_string string, containerID string, payload *data.Payload) {
-	script := []byte(script_string)
+func CopyScriptToContainer(file *data.File, containerID string) {
+	script := file.Data
 	var buf bytes.Buffer
 	tw := tar.NewWriter(&buf)
 	header := &tar.Header{
-		Name: "script.py",
+		Name: file.Name,
 		Size: int64(len(script)),
 		Mode: 0644,
 	}
 	tw.WriteHeader(header)
 	tw.Write(script)
-	err := Client.CopyToContainer(context.Background(), containerID, "/app/package/", &buf, types.CopyToContainerOptions{})
+	err := Client.CopyToContainer(context.Background(), containerID, file.Dest, &buf, types.CopyToContainerOptions{})
 	if err != nil {
 		panic(err)
 	}

@@ -118,7 +118,7 @@ class Tables(APIView, TableHelper):
         else:
             try:
                 tables = Table.objects.all()
-                table_list = [{'name':item.table_name, 'schema':item.table_columns} for item in tables ]
+                table_list = [{'name':item.table_name, 'fields':item.table_columns} for item in tables ]
                 return JsonResponse({"message":table_list}, status=200)
             except Exception as e:
                 print("Exception:", e)

@@ -20,6 +20,7 @@ def generate_api_hash(code, method, api_data):
 
 class Api(models.Model):
     # name = models.CharField(max_length=255)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='apis')
     endpoint = models.CharField(max_length=255, default=generate_unique_endpoint, unique=True)
     method = models.CharField(max_length=255)
     code = models.TextField()
@@ -48,6 +49,7 @@ def generate_unique_tableid():
             return uniqueId
 
 class Table(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tables')
     table_name = models.CharField(max_length=255)
     table_uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     table_columns = models.JSONField()

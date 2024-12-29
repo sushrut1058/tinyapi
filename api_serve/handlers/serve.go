@@ -31,12 +31,35 @@ func ApiServe(c *gin.Context) {
 		headers[key] = value[0]
 	}
 
+	ch := make(chan bool)
+
 	// check with db for existence
-	status, code, api_data := db.GetEndpointInfo(endpoint, method)
+	var (
+		status   int
+		code     string
+		api_data data.ApiData
+		user_id  int
+	)
+	status, code, api_data, user_id = db.GetEndpointInfo(endpoint, method)
 	if status != 200 {
+		ch <- false
 		c.JSON(status, gin.H{"message": "The endpoint you're trying to access doesn't exist"})
 		return
 	}
+
+	var tableDict map[string]string
+	go func() {
+		retVal := false
+		status, tableDict = db.GetTablesDict(user_id)
+		if status == 200 {
+			file := getDictFile(tableDict)
+			engine.CopyScriptToContainer(&file, engine.ContainerID)
+			retVal = true
+		} else {
+			c.JSON(status, gin.H{"message": "Couldn't find table list"})
+		}
+		ch <- retVal
+	}()
 
 	//make pathparams map[string]interface{}
 	pathParams := make(map[string]string)
@@ -82,6 +105,10 @@ func ApiServe(c *gin.Context) {
 			Body:    string(bodyStr),
 			Headers: headers,
 		},
+	}
+	retVal := <-ch
+	if !retVal {
+		log.Print("TableDict copying failed")
 	}
 	//fetch and engine.run() with payload
 	responseOut, responseErr := engine.Run(code, payload)

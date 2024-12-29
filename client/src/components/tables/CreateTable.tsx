@@ -17,7 +17,7 @@ export const CreateTable = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showBanner, setShowBanner] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
+  const url = "http://localhost:5000"
   const addField = () => {
     setFields([...fields, { name: '', type: 'string' }]);
   };
@@ -68,9 +68,30 @@ export const CreateTable = () => {
       // Simulating API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       setShowConfirmation(false);
-      setShowBanner(true);
-      setTableName('');
-      setFields([{ name: '', type: 'string' }]);
+
+      const resp = await fetch(`${url}/tables/create`, {
+        method: "POST",
+        headers: {
+            "Content-Type":"application/json"
+        },
+        body: JSON.stringify({"table_name": tableName,"table_columns":fields})
+      });
+
+      if(resp.status === 201){
+        const data = await resp.json();
+        console.log(data);
+        setShowBanner(true);
+      }else if(resp.status === 400) {
+        const data = await resp.json();
+        console.log(data);
+        setError('Invalid data provided.')
+      }else if(resp.status === 500) {
+        const data = await resp.json();
+        console.log(data);
+        setError('An error has occurred, please try again later.')
+      }
+      // setTableName('');
+      // setFields([{ name: '', type: 'string' }]);
     } catch (err) {
       setError('Failed to create table. Please try again.');
     }
