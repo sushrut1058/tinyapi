@@ -18,7 +18,8 @@ class ApiTest(APIView, ApiHelper):
     permission_classes=[AllowAny]
     def post(self, request):
         try:
-            url = "http://localhost:8080/compile"
+            # url = "http://localhost:8080/compile"
+            url = "http://172.17.0.1:8080/compile"
             # get code, request payload, parse and send
 
             fwd_body = {}

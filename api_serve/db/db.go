@@ -14,7 +14,7 @@ import (
 var db *sql.DB
 
 func DB_Connect() {
-	dbPath := "../db/private/db.sqlite3"
+	dbPath := "/db/private/db.sqlite3"
 
 	// Check if the database file exists
 	if _, err := os.Stat(dbPath); os.IsNotExist(err) {
