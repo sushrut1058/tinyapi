@@ -17,7 +17,7 @@ export const CreateTable = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showBanner, setShowBanner] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const url = "http://localhost:5000"
+  const url = import.meta.env.VITE_API_URL //"http://localhost:5000"
   const addField = () => {
     setFields([...fields, { name: '', type: 'string' }]);
   };

@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import CodeEditorWithTabs from '../components/code-editor/CodeEditorWithTabs';
 import CodeEditor from '../components/CodeEditor';
 import RequestPayload from '../components/RequestPayload';
 import Terminal from '../components/terminal/Terminal';
@@ -41,7 +42,7 @@ const Home = () => {
   const [status, setStatus] = useState<StatusMessage | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [stderr, setStderr] = useState<string | null>(null);
-  const url = "http://localhost:5000"
+  const url = import.meta.env.VITE_API_URL //"http://localhost:5000"
   const [showCreateTable, setShowCreateTable] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [currentView, setCurrentView] = useState<'tables' | 'payload'>('payload');
@@ -212,7 +213,7 @@ const Home = () => {
       <div className="h-screen overflow-hidden">
         <div className="p-6">
           <div className="space-y-4">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-between">
               <select
                 value={method}
                 onChange={(e) => setMethod(e.target.value)}
@@ -223,35 +224,36 @@ const Home = () => {
                 <option>PUT</option>
                 <option>DELETE</option>
               </select>
-              <ViewToggle view={currentView} onViewChange={setCurrentView} />
-              <div className="flex-1" />
-              <button
-                onClick={handleTest}
-                disabled={isLoading}
-                className={`flex items-center space-x-2 bg-blue-600 px-4 py-2 rounded-lg transition-colors ${
-                  isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
-                }`}
-              >
-                <Play className="w-4 h-4" />
-                <span>{isLoading ? 'Testing...' : 'Test'}</span>
-              </button>
-              <button
-                onClick={handleDeploy}
-                disabled={isLoading}
-                className={`flex items-center space-x-2 bg-green-600 px-4 py-2 rounded-lg transition-colors ${
-                  isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'
-                }`}
-              >
-                <Upload className="w-4 h-4" />
-                <span>{isLoading ? 'Deploying...' : 'Deploy'}</span>
-              </button>
+              <div className="flex items-center space-x-4">
+                <ViewToggle view={currentView} onViewChange={setCurrentView} />
+                <button
+                  onClick={handleTest}
+                  disabled={isLoading}
+                  className={`flex items-center space-x-2 bg-blue-600 px-4 py-2 rounded-lg transition-colors ${
+                    isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+                  }`}
+                >
+                  <Play className="w-4 h-4" />
+                  <span>{isLoading ? 'Testing...' : 'Test'}</span>
+                </button>
+                <button
+                  onClick={handleDeploy}
+                  disabled={isLoading}
+                  className={`flex items-center space-x-2 bg-green-600 px-4 py-2 rounded-lg transition-colors ${
+                    isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'
+                  }`}
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>{isLoading ? 'Deploying...' : 'Deploy'}</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-7 gap-6">
               <div className="col-span-5">
-                <CodeEditor value={code} onChange={setCode} />
+                <CodeEditorWithTabs value={code} onChange={setCode} />
               </div>
-              <div className="col-span-2 space-y-4">
+              <div className="col-span-2 h-[calc(100vh-14rem)] overflow-y-auto">
                 {currentView === 'tables' ? (
                   <>
                     <TablesSidebar
