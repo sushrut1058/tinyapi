@@ -38,7 +38,7 @@ class ApiTest(APIView, ApiHelper):
             else:
                 path_params_raw = fwd_body["payload"].get("path_params")
                 fwd_body["payload"]["path_params"] = self.parsePathParams_test(path_params_raw)
-
+            fwd_body["user_id"] = 1
             response = requests.post(url, data=json.dumps(fwd_body))
             
             return Response(response.json(), status=200)
@@ -61,7 +61,7 @@ class ApiDeploy(APIView):
             serializer = ApiSerializer(data=bodyObj)
             if serializer.is_valid():
                 serializer.save()
-                return Response({"message":"Successfully initiated API deployment."})
+                return Response({"message":f"Successfully initiated API deployment.Can be accessed at: http://tinyapi.xyz/{serializer['endpoint']}"})
             else:
                 print(serializer.errors)
                 return Response({"message":"Failed to parse input data for api"}, 400)

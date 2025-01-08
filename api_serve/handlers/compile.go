@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"backpocket/api-serve/data"
+	"backpocket/api-serve/db"
 	"backpocket/api-serve/engine"
 	"log"
 	"net/http"
@@ -14,6 +15,7 @@ func CompileHandler(c *gin.Context) {
 	var compileRequestBody struct {
 		Code    string       `json:"code"`
 		Payload data.Payload `json:"payload" binding:"required"`
+		UserId  int          `json:"user_id" binding:"required"`
 	}
 	err := c.ShouldBindBodyWithJSON(&compileRequestBody)
 	if err != nil {
@@ -21,6 +23,20 @@ func CompileHandler(c *gin.Context) {
 		panic(err)
 	}
 	then := time.Now()
+	var (
+		tableDict map[string]string
+		status    int
+	)
+
+	status, tableDict = db.GetTablesDict(compileRequestBody.UserId)
+	if status == 200 {
+		file := getDictFile(tableDict)
+		engine.CopyScriptToContainer(&file, engine.ContainerID)
+	} else {
+		c.JSON(status, gin.H{"message": "Couldn't find table list"})
+		return
+	}
+
 	responseOut, responseErr := engine.Run(compileRequestBody.Code, &compileRequestBody.Payload)
 	log.Printf("Time taken for execution: %s", time.Since(then))
 	status, responseJson := sanitizeResponse(responseOut)

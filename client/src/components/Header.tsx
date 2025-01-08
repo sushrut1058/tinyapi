@@ -7,7 +7,7 @@ const Header = () => {
       <div className="h-full px-6 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Code2 className="w-6 h-6 text-blue-500" />
-          <span className="text-xl font-semibold text-gray-100">backpocket.app</span>
+          <span className="text-xl font-semibold text-gray-100">tinyapi.xyz</span>
         </div>
         <button className="flex items-center space-x-2 px-4 py-2 rounded-lg hover:bg-gray-800 text-gray-300 transition-colors">
           <LogOut className="w-5 h-5" />
