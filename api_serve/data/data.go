@@ -1,5 +1,8 @@
 package data
 
+var RequestID uint32
+var EngineChannel chan bool
+
 type Request struct {
 	Body    interface{}            `json:"body"`
 	Headers map[string]interface{} `json:"headers"`

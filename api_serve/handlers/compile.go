@@ -6,12 +6,15 @@ import (
 	"backpocket/api-serve/engine"
 	"log"
 	"net/http"
+	"sync/atomic"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 func CompileHandler(c *gin.Context) {
+	atomic.AddUint32(&data.RequestID, 1)
+
 	var compileRequestBody struct {
 		Code    string       `json:"code"`
 		Payload data.Payload `json:"payload" binding:"required"`
@@ -28,16 +31,18 @@ func CompileHandler(c *gin.Context) {
 		status    int
 	)
 
+	handle := engine.GetHandle()
 	status, tableDict = db.GetTablesDict(compileRequestBody.UserId)
 	if status == 200 {
 		file := getDictFile(tableDict)
-		engine.CopyScriptToContainer(&file, engine.ContainerID)
+		handle.CopyScriptToContainer(&file, engine.ContainerID)
 	} else {
 		c.JSON(status, gin.H{"message": "Couldn't find table list"})
 		return
 	}
 
-	responseOut, responseErr := engine.Run(compileRequestBody.Code, &compileRequestBody.Payload)
+	responseOut, responseErr := handle.Run(compileRequestBody.Code, &compileRequestBody.Payload)
+	handle.Channel <- true
 	log.Printf("Time taken for execution: %s", time.Since(then))
 	status, responseJson := sanitizeResponse(responseOut)
 	c.JSON(status, gin.H{"response": responseJson, "errors": responseErr})
