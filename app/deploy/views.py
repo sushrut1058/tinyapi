@@ -61,7 +61,7 @@ class ApiDeploy(APIView):
             serializer = ApiSerializer(data=bodyObj)
             if serializer.is_valid():
                 serializer.save()
-                return Response({"message":f"Successfully initiated API deployment.Can be accessed at: http://tinyapi.xyz/{serializer['endpoint']}"})
+                return Response({"message":f"https://tinyapi.xyz/api/{serializer.data['endpoint']}"})
             else:
                 print(serializer.errors)
                 return Response({"message":"Failed to parse input data for api"}, 400)
@@ -75,7 +75,7 @@ class ApiDeploy(APIView):
 
     def get(self, request):
         apis = Api.objects.all()
-        data = [{"endpoint":api.endpoint, "method":api.method, "updated":api.updated_at, "code":api.code} for api in apis]
+        data = [{"name":api.api_name, "endpoint":api.endpoint, "method":api.method, "createdAt":api.created_at, "updatedAt":api.updated_at} for api in apis]
         print("Data",data)
         return JsonResponse(data, safe=False)
     

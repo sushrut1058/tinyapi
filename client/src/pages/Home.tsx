@@ -11,6 +11,7 @@ import CreateTable from '../components/tables/CreateTable';
 import { ViewToggle } from '../components/ViewToggle';
 import { Play, Upload, X } from 'lucide-react';
 import { Table } from '../types/tables';
+import EndpointBanner from '../components/EndpointBanner';
 
 interface StatusMessage {
   type: 'success' | 'error';
@@ -33,8 +34,9 @@ const Home = () => {
 
   const [method, setMethod] = useState('GET');
   const [code, setCode] = useState(templateCodeRef.current);
+  const [apiName, setApiName] = useState('');
   const [headers, setHeaders] = useState([{ id: 1, key: 'Content-Type', value: 'application/json' }]);
-  const [queryParams, setQueryParams] = useState<{id:number, key: string, value:string}|[]>([]);
+  const [queryParams, setQueryParams] = useState<{id:number, key: string, value:string}[]|[]>([]);
   const [pathParams, setPathParams] = useState<{id:number, key: string, value:string}[]|[]>([]);
   const [body, setBody] = useState(templateBodyRef.current);
   const [response, setResponse] = useState<string | null>(null);
@@ -46,6 +48,7 @@ const Home = () => {
   const [showCreateTable, setShowCreateTable] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [currentView, setCurrentView] = useState<'tables' | 'payload'>('payload');
+  const [deployedEndpoint, setDeployedEndpoint] = useState<string | null>(null);
 
   // Dummy data for demonstration
   const [tables, setTables] = useState<Table[]>([
@@ -174,8 +177,9 @@ const Home = () => {
       if(resp.ok){
         setStatus({
           type: 'success',
-          text: data.message
+          text: `Successfully deployed API ${apiName}`
         });
+        setDeployedEndpoint(`tinyapi.xyz/api/${data.message}`);
       }else{
         setStatus({
           type: 'error',
@@ -198,6 +202,7 @@ const Home = () => {
     const pathParamsArray = (pathParams.filter((item) => item.key!="")).map((item)=>item.key)
 
     const body = {
+      api_name: apiName,
       code: code,
       method: method,
       api_data: {
@@ -210,10 +215,24 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 pl-16">
+      {deployedEndpoint && (
+        <EndpointBanner 
+          endpoint={deployedEndpoint}
+          onClose={() => setDeployedEndpoint(null)}
+        />
+      )}
       <div className="h-screen overflow-hidden">
         <div className="p-6">
           <div className="space-y-4">
             <div className="flex items-center justify-between">
+              <div className="space-x-4">
+              <input
+                    type="text"
+                    value={apiName}
+                    onChange={(e) => setApiName(e.target.value)}
+                    placeholder="API Name *"
+                    className="w-64 bg-gray-800 text-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
               <select
                 value={method}
                 onChange={(e) => setMethod(e.target.value)}
@@ -224,6 +243,7 @@ const Home = () => {
                 <option>PUT</option>
                 <option>DELETE</option>
               </select>
+              </div>
               <div className="flex items-center space-x-4">
                 <ViewToggle view={currentView} onViewChange={setCurrentView} />
                 <button

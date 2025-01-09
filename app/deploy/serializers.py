@@ -17,7 +17,7 @@ class ApiSerializer(serializers.ModelSerializer):
    
     class Meta:
         model = Api
-        fields = ['id', 'user', 'endpoint', 'api_data', 'method', 'code', 'created_at', 'updated_at']
+        fields = ['id', 'user', 'api_name', 'endpoint', 'api_data', 'method', 'code', 'created_at', 'updated_at']
 
 class TableSerializer(serializers.ModelSerializer):
     # table_uuid = serializers.UUIDField(format='canonical', read_only=True)

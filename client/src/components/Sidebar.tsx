@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, User, Database } from 'lucide-react';
+import { Home, List, Database } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
@@ -26,12 +26,12 @@ const Sidebar = () => {
         <Database className="w-6 h-6 text-gray-300" />
       </Link>
       <Link 
-        to="/profile"
+        to="/myapis"
         className={`p-3 rounded-lg transition-colors ${
-          isActive('/profile') ? 'bg-blue-600' : 'hover:bg-gray-800'
+          isActive('/myapis') ? 'bg-blue-600' : 'hover:bg-gray-800'
         }`}
       >
-        <User className="w-6 h-6 text-gray-300" />
+        <List className="w-6 h-6 text-gray-300" />
       </Link>
     </div>
   );

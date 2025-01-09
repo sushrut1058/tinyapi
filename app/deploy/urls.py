@@ -4,6 +4,7 @@ from .views import ApiTest, ApiDeploy, ApiDelete, Tables
 urlpatterns = [
     path('test', ApiTest.as_view(), name='test'),
     path('deploy', ApiDeploy.as_view(), name='deploy'),
+    path('list', ApiDeploy.as_view(), name='list_apis'),
     path('delete', ApiDelete.as_view(), name='delete'),
     path('tables/create', Tables.as_view(), name='create'),
     path('tables/list', Tables.as_view(), name='list'),

@@ -21,6 +21,7 @@ def generate_api_hash(code, method, api_data):
 class Api(models.Model):
     # name = models.CharField(max_length=255)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='apis')
+    api_name = models.CharField(max_length=255)
     endpoint = models.CharField(max_length=255, default=generate_unique_endpoint, unique=True)
     method = models.CharField(max_length=255)
     code = models.TextField()

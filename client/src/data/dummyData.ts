@@ -8,19 +8,19 @@ export const dummyActivity: ActivityItem[] = [
 
 export const dummyApis: ApiItem[] = [
   {
+    name:"dummy",
     endpoint: '/api/users',
     method: 'GET',
-    hits: 1234,
+    // hits: 1234,
     createdAt: new Date(Date.now() - 86400000),
     updatedAt: new Date(),
-    code: 'export default function handler(req, res) {\n  res.status(200).json({ users: [] });\n}',
   },
   {
+    name:"dummy",
     endpoint: '/api/products',
     method: 'POST',
-    hits: 567,
+    // hits: 567,
     createdAt: new Date(Date.now() - 172800000),
     updatedAt: new Date(Date.now() - 3600000),
-    code: 'export default function handler(req, res) {\n  res.status(201).json({ message: "Product created" });\n}',
   },
 ];
