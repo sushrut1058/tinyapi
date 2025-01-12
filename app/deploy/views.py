@@ -129,6 +129,7 @@ class Tables(APIView, TableHelper):
         try:
             request_data = json.loads(request.body)
             with transaction.atomic():
+                print(request_data)
                 table_serializer = TableSerializer(data=request_data)
                 if table_serializer.is_valid():
                     table_serializer.save()
@@ -136,6 +137,7 @@ class Tables(APIView, TableHelper):
                     self._createTable(request_data)
                     return JsonResponse({"message":"Successfully created table with given specs"}, status=201)
                 else:
+                    print(table_serializer.errors)
                     raise exceptions.TableInvalidSerializerException("Invalid Serializer Data")
         except exceptions.TableCreationFailedException as e:
             print(f"Exception: {str(e)}")
@@ -143,6 +145,9 @@ class Tables(APIView, TableHelper):
         except exceptions.TableInvalidSerializerException as e:
             print(f"Exception: {str(e)}")
             return JsonResponse({"message":"Couldn't create table with given specifications..."}, status=400)
+        except exceptions.TableDuplicateName as e:
+            print(f"Exception: {str(e)}")
+            return JsonResponse({"message":"Table with the same name already exists"}, status=400)
         except Exception as e:
             print(f"Exception: {str(e)}")
             return JsonResponse({"message":"Something went wrong while creating the table, please try again after some time..."}, status=500)

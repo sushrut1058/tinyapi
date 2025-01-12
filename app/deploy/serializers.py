@@ -22,12 +22,10 @@ class ApiSerializer(serializers.ModelSerializer):
 class TableSerializer(serializers.ModelSerializer):
     # table_uuid = serializers.UUIDField(format='canonical', read_only=True)
     def to_internal_value(self, data):
-        data['user']=1
         return super().to_internal_value(data)
 
     def to_representation(self, instance):
         ret = super().to_representation(instance)
-        ret['user'] = 1
         return ret
 
     class Meta:

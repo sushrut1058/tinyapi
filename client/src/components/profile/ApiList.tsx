@@ -41,7 +41,7 @@ const ApiList: React.FC<ApiListProps> = ({ apis, onEdit }) => {
                 onClick={() => onEdit(api)}
                 className="text-blue-400 hover:text-blue-300"
               >
-                Edit
+                View/Edit
               </button>
             </td>
           </tr>

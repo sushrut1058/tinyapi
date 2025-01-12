@@ -12,6 +12,8 @@ import { ViewToggle } from '../components/ViewToggle';
 import { Play, Upload, X } from 'lucide-react';
 import { Table } from '../types/tables';
 import EndpointBanner from '../components/EndpointBanner';
+import { GoogleLogin } from "@react-oauth/google";
+import axios from 'axios';
 
 interface StatusMessage {
   type: 'success' | 'error';
@@ -44,12 +46,12 @@ const Home = () => {
   const [status, setStatus] = useState<StatusMessage | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [stderr, setStderr] = useState<string | null>(null);
-  const url = import.meta.env.VITE_API_URL //"http://localhost:5000"
   const [showCreateTable, setShowCreateTable] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [currentView, setCurrentView] = useState<'tables' | 'payload'>('payload');
   const [deployedEndpoint, setDeployedEndpoint] = useState<string | null>(null);
-
+  const url = import.meta.env.VITE_API_URL //"http://localhost:5000"
+  
   // Dummy data for demonstration
   const [tables, setTables] = useState<Table[]>([
     {
@@ -213,6 +215,27 @@ const Home = () => {
     return body
   }
 
+  const handleLogin = async (credentialResponse) => {
+    try {
+      const response = await fetch(`${url}/auth/login/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({token: credentialResponse.credential})
+      });
+      const data = await response.json();
+      if(response.ok){
+        console.log("Logged in")
+      }else{
+        console.log(data);
+        console.log("Failed")
+      }
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 pl-16">
       {deployedEndpoint && (
@@ -221,6 +244,10 @@ const Home = () => {
           onClose={() => setDeployedEndpoint(null)}
         />
       )}
+      <GoogleLogin
+        onSuccess={(credentialResponse) => handleLogin(credentialResponse)}
+        onError={() => console.error("Login failed")}
+      />
       <div className="h-screen overflow-hidden">
         <div className="p-6">
           <div className="space-y-4">

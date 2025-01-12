@@ -12,5 +12,8 @@ class TableCreationFailedException(Exception):
 class TableInvalidSerializerException(Exception):
     pass
 
+class TableDuplicateName(Exception):
+    pass 
+
 class InvalidValueException(Exception):
     pass

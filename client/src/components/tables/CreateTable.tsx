@@ -84,7 +84,7 @@ export const CreateTable = () => {
       }else if(resp.status === 400) {
         const data = await resp.json();
         console.log(data);
-        setError('Invalid data provided.')
+        setError(data.message)
       }else if(resp.status === 500) {
         const data = await resp.json();
         console.log(data);
