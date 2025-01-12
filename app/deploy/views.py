@@ -1,13 +1,12 @@
 from rest_framework import viewsets
 from rest_framework.decorators import permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.http import JsonResponse
 from django.db import transaction, connections
 import json, re
 import requests
-
 from .models import Api,Table
 from .serializers import ApiSerializer, TableSerializer
 from . import exceptions
@@ -15,7 +14,8 @@ from .helper_api import TableHelper, ApiHelper
 import requests
 
 class ApiTest(APIView, ApiHelper):
-    permission_classes=[AllowAny]
+    permission_classes=[IsAuthenticated]
+
     def post(self, request):
         try:
             # url = "http://localhost:8080/compile"
@@ -38,7 +38,8 @@ class ApiTest(APIView, ApiHelper):
             else:
                 path_params_raw = fwd_body["payload"].get("path_params")
                 fwd_body["payload"]["path_params"] = self.parsePathParams_test(path_params_raw)
-            fwd_body["user_id"] = 1
+            fwd_body["user_id"] = request.user.id
+            
             response = requests.post(url, data=json.dumps(fwd_body))
             
             return Response(response.json(), status=200)
@@ -52,11 +53,12 @@ class ApiTest(APIView, ApiHelper):
 
 
 class ApiDeploy(APIView):
-    permission_classes=[AllowAny]
+    permission_classes=[IsAuthenticated]
     
     def post(self, request):
         try:
             bodyObj = request.data['body']
+            bodyObj['user'] = request.user.id
             # serializer = ApiSerializer(endpoint=bodyObj['endpoint'], method=bodyObj['method'], code=bodyObj['code'], api_data=bodyObj['api_data'])
             serializer = ApiSerializer(data=bodyObj)
             if serializer.is_valid():
@@ -80,7 +82,7 @@ class ApiDeploy(APIView):
         return JsonResponse(data, safe=False)
     
 class ApiDelete(APIView):
-    permission_classes=[AllowAny]
+    permission_classes=[IsAuthenticated]
     
     def post(self, request):
         try:
@@ -93,7 +95,7 @@ class ApiDelete(APIView):
             return JsonResponse({"message":"Failed to delete endpoint"}, status=500)
 
 class Tables(APIView, TableHelper):
-    permission_classes=[AllowAny]
+    permission_classes=[IsAuthenticated]
     
     def get(self, request, table_name=None):
         if table_name:    
@@ -118,7 +120,7 @@ class Tables(APIView, TableHelper):
                 return JsonResponse({"message":"Something went wrong while fetching the table, please try again after some time..."}, status=500)
         else:
             try:
-                tables = Table.objects.all()
+                tables = Table.objects.filter(user=request.user.id)
                 table_list = [{'name':item.table_name, 'fields':item.table_columns} for item in tables ]
                 return JsonResponse({"message":table_list}, status=200)
             except Exception as e:
@@ -128,8 +130,9 @@ class Tables(APIView, TableHelper):
     def post(self, request):
         try:
             request_data = json.loads(request.body)
+            request_data['user'] = request.user.id
+
             with transaction.atomic():
-                print(request_data)
                 table_serializer = TableSerializer(data=request_data)
                 if table_serializer.is_valid():
                     table_serializer.save()
@@ -139,6 +142,7 @@ class Tables(APIView, TableHelper):
                 else:
                     print(table_serializer.errors)
                     raise exceptions.TableInvalidSerializerException("Invalid Serializer Data")
+        
         except exceptions.TableCreationFailedException as e:
             print(f"Exception: {str(e)}")
             return JsonResponse({"message":"Something went wrong, please try again later..."}, status=400)

@@ -1,6 +1,6 @@
 from django.urls import path, include
 from django.http import JsonResponse
-from .views import AuthView
+from .views import AuthView, AuthStatus
 
 def login_success(request):
     user = request.user
@@ -14,6 +14,6 @@ def login_success(request):
 
 urlpatterns = [
     
-    path('login/', AuthView.as_view(), name ='home'),
-    path('login-success/', login_success)
+    path('login/', AuthView.as_view(), name='home'),
+    path('status/', AuthStatus.as_view(), name='status')
 ]

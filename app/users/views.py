@@ -46,3 +46,8 @@ class AuthView(APIView):
         except Exception as e:
             print(e)
             return JsonResponse({"message": "Sorry something went wrong, please try logging in after some time..."}, status=500)
+
+class AuthStatus(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        return JsonResponse({},status=200)

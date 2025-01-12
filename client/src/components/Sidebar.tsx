@@ -10,7 +10,7 @@ const Sidebar = () => {
   return (
     <div className="w-16 bg-gray-900 h-screen fixed left-0 top-0 flex flex-col items-center py-4">
       <Link 
-        to="/"
+        to="/home"
         className={`p-3 rounded-lg mb-2 transition-colors ${
           isActive('/') ? 'bg-blue-600' : 'hover:bg-gray-800'
         }`}

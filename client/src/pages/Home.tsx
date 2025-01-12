@@ -1,6 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useContext } from 'react';
 import CodeEditorWithTabs from '../components/code-editor/CodeEditorWithTabs';
-import CodeEditor from '../components/CodeEditor';
 import RequestPayload from '../components/RequestPayload';
 import Terminal from '../components/terminal/Terminal';
 import StatusMessage from '../components/feedback/StatusMessage';
@@ -12,8 +11,7 @@ import { ViewToggle } from '../components/ViewToggle';
 import { Play, Upload, X } from 'lucide-react';
 import { Table } from '../types/tables';
 import EndpointBanner from '../components/EndpointBanner';
-import { GoogleLogin } from "@react-oauth/google";
-import axios from 'axios';
+import AuthContext from '../contexts/AuthContext';
 
 interface StatusMessage {
   type: 'success' | 'error';
@@ -50,37 +48,19 @@ const Home = () => {
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [currentView, setCurrentView] = useState<'tables' | 'payload'>('payload');
   const [deployedEndpoint, setDeployedEndpoint] = useState<string | null>(null);
-  const url = import.meta.env.VITE_API_URL //"http://localhost:5000"
+  const [tables, setTables] = useState<Table[]>([]);
   
-  // Dummy data for demonstration
-  const [tables, setTables] = useState<Table[]>([
-    {
-      name: 'users',
-      fields: [
-        { name: 'id', type: 'uuid' },
-        { name: 'email', type: 'string' },
-        { name: 'created_at', type: 'timestamp' },
-      ],
-      data: []
-    },
-    {
-      name: 'posts',
-      fields: [
-        { name: 'id', type: 'uuid' },
-        { name: 'title', type: 'string' },
-        { name: 'content', type: 'text' },
-        { name: 'user_id', type: 'uuid' },
-      ],
-      data: []
-    }
-  ]);
+  const {accessToken, user} = useContext(AuthContext);
+  console.log(accessToken, user);
+  const url = import.meta.env.VITE_API_URL //"http://localhost:5000"
 
   const fetchTableList = async () => {
     try{
       const resp = await fetch(`${url}/tables/list`,{
         'method':'GET',
         'headers':{
-          'Content-Type':'application/json'
+          'Content-Type':'application/json',
+          'Authorization':`Bearer ${accessToken}`
         }
       });
       const data = await resp.json()
@@ -132,7 +112,8 @@ const Home = () => {
       const resp = await fetch(`${url}/test`, {
         method: "POST",
         headers: {
-          'Content-Type':'application/json'
+          'Content-Type':'application/json',
+          'Authorization':`Bearer ${accessToken}`
         },
         body: JSON.stringify(reqBody)
       })
@@ -170,7 +151,8 @@ const Home = () => {
       const resp = await fetch(`${url}/deploy`, {
         method: "POST",
         headers: {
-          'Content-Type':'application/json'
+          'Content-Type':'application/json',
+          'Authorization': `Bearer ${accessToken}`
         },
         body: JSON.stringify({body})
       })
@@ -181,7 +163,7 @@ const Home = () => {
           type: 'success',
           text: `Successfully deployed API ${apiName}`
         });
-        setDeployedEndpoint(`tinyapi.xyz/api/${data.message}`);
+        setDeployedEndpoint(data.message);
       }else{
         setStatus({
           type: 'error',
@@ -215,26 +197,7 @@ const Home = () => {
     return body
   }
 
-  const handleLogin = async (credentialResponse) => {
-    try {
-      const response = await fetch(`${url}/auth/login/`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({token: credentialResponse.credential})
-      });
-      const data = await response.json();
-      if(response.ok){
-        console.log("Logged in")
-      }else{
-        console.log(data);
-        console.log("Failed")
-      }
-    } catch (error) {
-      console.error("Login failed:", error);
-    }
-  };
+  
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 pl-16">
@@ -244,10 +207,6 @@ const Home = () => {
           onClose={() => setDeployedEndpoint(null)}
         />
       )}
-      <GoogleLogin
-        onSuccess={(credentialResponse) => handleLogin(credentialResponse)}
-        onError={() => console.error("Login failed")}
-      />
       <div className="h-screen overflow-hidden">
         <div className="p-6">
           <div className="space-y-4">

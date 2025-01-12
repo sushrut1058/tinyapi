@@ -1,3 +1,4 @@
+from datetime import timedelta
 """
 Django settings for app project.
 
@@ -147,3 +148,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Lifetime of access tokens
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    # Lifetime of refresh tokens
+    'ROTATE_REFRESH_TOKENS': True,                 # Automatically issue a new refresh token on use
+    'BLACKLIST_AFTER_ROTATION': True,              # Blacklist old refresh tokens after rotation
+}

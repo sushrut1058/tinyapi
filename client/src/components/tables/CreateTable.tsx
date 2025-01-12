@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import ConfirmationDialog from '../ConfirmationDialog';
 import Banner from '../Banner';
 import ErrorMessage from '../ErrorMessage';
+import AuthContext from '../../contexts/AuthContext';
 
 interface Field {
   name: string;
@@ -17,7 +18,10 @@ export const CreateTable = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showBanner, setShowBanner] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const {accessToken} = useContext(AuthContext);
   const url = import.meta.env.VITE_API_URL //"http://localhost:5000"
+
   const addField = () => {
     setFields([...fields, { name: '', type: 'string' }]);
   };
@@ -72,7 +76,8 @@ export const CreateTable = () => {
       const resp = await fetch(`${url}/tables/create`, {
         method: "POST",
         headers: {
-            "Content-Type":"application/json"
+            "Content-Type":"application/json",
+            "Authorization":`Bearer ${accessToken}`
         },
         body: JSON.stringify({"table_name": tableName,"table_columns":fields})
       });

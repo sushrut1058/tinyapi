@@ -1,12 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import ApiList from '../components/profile/ApiList';
 import { ApiDetails } from '../components/profile/ApiDetails';
 import { ApiItem } from '../types/profile';
+import AuthContext from '../contexts/AuthContext';
 
 const MyApisPage = () => {
   const [selectedApi, setSelectedApi] = useState<ApiItem | null>(null);
   const [apiCode, setApiCode] = useState('');
   const [apis, setApis] = useState<ApiItem[]|[]>([])
+
+  const {accessToken} = useContext(AuthContext);
   const url = import.meta.env.VITE_API_URL //"http://localhost:5000"
 
   const handleApiEdit = (api: ApiItem) => {
@@ -19,7 +22,8 @@ const MyApisPage = () => {
         const resp = await fetch(`${url}/list`, {
             'method':'GET',
             'headers':{
-                'Content-Type':'application/json'
+                'Content-Type':'application/json',
+                'Authorization':`Bearer ${accessToken}`
             }
         });
         const data = await resp.json()
