@@ -19,7 +19,7 @@ var ContainerID string
 
 func createEngine() string {
 	var err error
-	user_tables_dbpath := "/home/sawdust/tiny-api/db/mount/:/app/db"
+	user_tables_dbpath := "/db/mount/:/app/db"
 	Client, err = client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		panic(err)

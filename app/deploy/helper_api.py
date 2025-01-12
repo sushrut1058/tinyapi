@@ -17,7 +17,7 @@ class TableHelper:
     def _createTable(self, jsonObj):
         #serialize
         table_name = "table_"+jsonObj.get("table_name").replace('-','_')
-        raw_table_columns = jsonObj.get("table_columns")
+        raw_table_columns = jsonObj.get("table_columns")[1:]
         col_dict_ref = {
             "string": "VARCHAR(255)",
             "integer":"INTEGER",
@@ -66,3 +66,14 @@ class TableHelper:
                 return [columns, data]
         except Exception as e:
             raise e
+        
+    def getUUID(self, rawData):
+        return "table_"+str(rawData).replace('-','_')
+    
+    def _addIDField(self, rawData):
+        obj = rawData['table_columns']
+        for item in obj:
+            if item['name']=='id':
+                raise Exception("Please use a different field name, id is already taken for default primary key")
+        rawData['table_columns'].insert(0,{'name':'id', 'type':'integer'})
+        return rawData

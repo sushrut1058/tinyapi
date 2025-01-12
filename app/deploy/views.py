@@ -94,44 +94,15 @@ class ApiDelete(APIView):
             print(e)
             return JsonResponse({"message":"Failed to delete endpoint"}, status=500)
 
-class Tables(APIView, TableHelper):
+class TablesCreate(APIView, TableHelper):
     permission_classes=[IsAuthenticated]
     
-    def get(self, request, table_name=None):
-        if table_name:    
-            try:
-                table_name_regex = r'^[a-zA-Z][a-zA-Z0-9_]*$'
-                if not re.match(table_name_regex, table_name):
-                    raise exceptions.InvalidValueException
-                table = Table.objects.filter(table_name=table_name)
-                if table.count()==1:
-                    #actual table name
-                    table_name_uuid = "table_"+str(table[0].table_uuid).replace('-','_')
-                    [columns, table_data] = self._fetchTable(table_name_uuid)
-                    response = {'name':table_name, 'columns':columns, 'data':table_data}
-                    return JsonResponse({"message":response}, status=200)
-                elif table.count()==0:
-                    return JsonResponse({"message":"No table with the given name could be found"}, status=400)
-                else:
-                    #@todo: raise some internal flag
-                    return JsonResponse({"message":"Something went wrong"}, status=500)                
-            except Exception as e:
-                print("Exception:", e)
-                return JsonResponse({"message":"Something went wrong while fetching the table, please try again after some time..."}, status=500)
-        else:
-            try:
-                tables = Table.objects.filter(user=request.user.id)
-                table_list = [{'name':item.table_name, 'fields':item.table_columns} for item in tables ]
-                return JsonResponse({"message":table_list}, status=200)
-            except Exception as e:
-                print("Exception:", e)
-                return JsonResponse({"message": "Something went wrong while fetching the table, please try again after some time..."}, status=500)
-
     def post(self, request):
         try:
             request_data = json.loads(request.body)
             request_data['user'] = request.user.id
-
+            request_data = self._addIDField(request_data)
+            print(request_data)
             with transaction.atomic():
                 table_serializer = TableSerializer(data=request_data)
                 if table_serializer.is_valid():
@@ -156,5 +127,43 @@ class Tables(APIView, TableHelper):
             print(f"Exception: {str(e)}")
             return JsonResponse({"message":"Something went wrong while creating the table, please try again after some time..."}, status=500)
 
-    
-    
+class TablesFetch(APIView, TableHelper):
+    permission_classes=[IsAuthenticated]
+    def get(self, request, table_name=None, category=None):
+        if table_name:    
+            try:
+                table_name_regex = r'^[a-zA-Z][a-zA-Z0-9_]*$'
+                if not re.match(table_name_regex, table_name):
+                    raise exceptions.InvalidValueException
+                table = Table.objects.filter(table_name=table_name, user=request.user.id)
+                if table.count()==1:
+                    #actual table name
+                    table_name_uuid = self.getUUID(table[0].table_uuid)
+                    [columns, table_data] = self._fetchTable(table_name_uuid)
+                    response = {'name':table_name, 'fields':table[0].table_columns, 'data':table_data}
+                    return JsonResponse({"message":response}, status=200)
+                elif table.count()==0:
+                    return JsonResponse({"message":"No table with the given name could be found"}, status=400)
+                else:
+                    #@todo: raise some internal flag
+                    return JsonResponse({"message":"Something went wrong"}, status=500)                
+            except Exception as e:
+                print("Exception:", e)
+                return JsonResponse({"message":"Something went wrong while fetching the table, please try again after some time..."}, status=500)
+        elif category=="schema":
+            try:
+                tables = Table.objects.filter(user=request.user.id)
+                table_list = [{'name':item.table_name, 'fields':item.table_columns} for item in tables ]
+                return JsonResponse({"message":table_list}, status=200)
+            except Exception as e:
+                print("Exception:", e)
+                return JsonResponse({"message": "Something went wrong while fetching the table, please try again after some time..."}, status=500)
+        else:
+            try:
+                tables = Table.objects.filter(user=request.user.id)
+                table_list = [[self.getUUID(item.table_uuid),len(item.table_columns)] for item in tables]
+                # query_lists = 
+                return JsonResponse({"message":table_list}, status=200)
+            except Exception as e:
+                print("Exception:", e)
+                return JsonResponse({"message": "Something went wrong while fetching the table, please try again after some time..."}, status=500)

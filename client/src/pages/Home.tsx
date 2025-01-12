@@ -56,7 +56,7 @@ const Home = () => {
 
   const fetchTableList = async () => {
     try{
-      const resp = await fetch(`${url}/tables/list`,{
+      const resp = await fetch(`${url}/tables/list/schema/`,{
         'method':'GET',
         'headers':{
           'Content-Type':'application/json',

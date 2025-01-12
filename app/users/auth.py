@@ -31,7 +31,7 @@ def create_default_tables(id, tearDown=TableHelper()._TableHelper__tearDown):
                 table_serializer.save()
                 # add a table in user_tables.sqlite3
                 table_uuid = "table_"+str(table_serializer.data['table_uuid']).replace('-','_')
-                users_table_query = f"CREATE TABLE {table_uuid} (id UUID PRIMARY KEY, email VARCHAR(255) NOT NULL UNIQUE, full_name VARCHAR(255) NOT NULL, username VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255) NOT NULL);"
+                users_table_query = f"CREATE TABLE {table_uuid} (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT, email VARCHAR(255) NOT NULL UNIQUE, full_name VARCHAR(255) NOT NULL, username VARCHAR(255) NOT NULL UNIQUE, password VARCHAR(255) NOT NULL);"
                 # now will first create a table, and on success will add the row.
                 try:
                     with connections['user_tables'].cursor() as cursor:
