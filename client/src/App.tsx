@@ -16,7 +16,7 @@ function App() {
               <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
               <Route path="/tables/view" element={<PrivateRoute><ViewTables /></PrivateRoute>} />
               <Route path="/tables/create" element={<PrivateRoute><CreateTable /></PrivateRoute>} />
-              <Route path="/myapis" element={<PrivateRoute><MyApisPage /></PrivateRoute>} />
+              <Route path="/user/apis" element={<PrivateRoute><MyApisPage /></PrivateRoute>} />
             </Routes>
     </Router>
   );

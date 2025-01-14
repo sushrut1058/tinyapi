@@ -75,24 +75,61 @@ class ApiDeploy(APIView):
             print(e)
             return Response({"message":"Something went wrong and we're working on it. Please try again later."}, status=500)
 
-    def get(self, request):
-        apis = Api.objects.all()
-        data = [{"name":api.api_name, "endpoint":api.endpoint, "method":api.method, "createdAt":api.created_at, "updatedAt":api.updated_at} for api in apis]
-        print("Data",data)
-        return JsonResponse(data, safe=False)
+    def get(self, request, endpoint=None):
+        if endpoint==None:
+            try:
+                apis = Api.objects.filter(user=request.user.id)
+                data = [{"name":api.api_name, "endpoint":api.endpoint, "method":api.method, "createdAt":api.created_at, "updatedAt":api.updated_at} for api in apis]
+                print("Data",data)
+                return JsonResponse(data, safe=False)
+            except Exception as e:
+                print(e)
+                return JsonResponse({"message":"Something went wrong"}, status=500)
+        else:
+            try:
+                api = Api.objects.get(user=request.user.id, endpoint=endpoint)
+                api_data = json.loads(api.api_data)
+                data = {"code":api.code, "api_url":api_data.get('api_url'), "method":api.method}
+                return JsonResponse({"message": data}, status=200)
+            except Exception as e:
+                print(e)
+                return JsonResponse({"message":"Error getting details"}, status=500)
+
     
 class ApiDelete(APIView):
     permission_classes=[IsAuthenticated]
     
     def post(self, request):
         try:
-            print(request.data)
-            endpoint = request.data['endpoint']
-            Api.objects.get(endpoint=endpoint).delete()
-            return JsonResponse({"message":"Deleted endpoint successfully"}, status=200)
+            user_id = request.user.id
+            endpoint = request.data.get('endpoint')
+            if endpoint:
+                Api.objects.get(user=user_id, endpoint=endpoint).delete()
+                return JsonResponse({"message":"Removed API successfully"}, status=200)
+            else:
+                return JsonResponse({"message":"Invalid request"}, status=400)
         except Exception as e:
             print(e)
-            return JsonResponse({"message":"Failed to delete endpoint"}, status=500)
+            return JsonResponse({"message":"Failed to remove endpoint"}, status=500)
+
+class ApiUpdate(APIView):
+    permission_classes=[IsAuthenticated]
+
+    def post(self, request):
+        try:
+            code = request.data.get('code')
+            endpoint = request.data.get('endpoint')
+            user_id = request.user.id
+            if code and endpoint and user_id:
+                api = Api.objects.filter(user=user_id, endpoint=endpoint)
+                if len(api) and api[0].code!=code:
+                    api.update(code=code)
+                return JsonResponse({"message": "Successfully updated API"}, status=200)    
+            else:
+                return JsonResponse({"message": "Empty body not allowed."}, status=400)
+        except Exception as e:
+            print(e)
+            return JsonResponse({"message": "Failed to update API"}, status=500)
 
 class TablesCreate(APIView, TableHelper):
     permission_classes=[IsAuthenticated]

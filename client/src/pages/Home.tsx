@@ -49,10 +49,26 @@ const Home = () => {
   const [currentView, setCurrentView] = useState<'tables' | 'payload'>('payload');
   const [deployedEndpoint, setDeployedEndpoint] = useState<string | null>(null);
   const [tables, setTables] = useState<Table[]>([]);
+  const [apiUrl, setApiUrl] = useState<string>("");
   
   const {accessToken, user} = useContext(AuthContext);
   console.log(accessToken, user);
   const url = import.meta.env.VITE_API_URL //"http://localhost:5000"
+  
+  const createApiUrl = (queryParamsVar: {id:number, key: string, value:string}[]|[], pathParamsVar: {id:number, key: string, value:string}[]|[]) => {
+    const qObj = queryParamsVar.filter(item => item.key!=="").reduce((accumulator, item, index) =>{
+      return accumulator + `${index > 0 ? '&' : ''}${item.key}=[]`; 
+    }, '')
+    console.log(qObj);
+    const pObj = pathParamsVar.filter(item => item.key!=='').reduce((accumulator, item, index) => {
+      return accumulator + `${index > 0 ? '/' : ''}:${item.key}`;
+    }, '')
+    console.log(pObj, pathParamsVar.filter(item => item.key!==''))
+    const finalPath = pObj + `${qObj==='' ? '' : '?'}${qObj}`;
+    // setApiUrl(`/${finalPath}`);
+    return '/'+finalPath;
+
+  }
 
   const fetchTableList = async () => {
     try{
@@ -139,6 +155,13 @@ const Home = () => {
       });
       return;
     }
+    if (!apiName) {
+      setStatus({
+        type: 'error',
+        text: 'Please assign a name to your API'
+      });
+      return;
+    }
     setShowDeployConfirm(true);
   };
 
@@ -190,6 +213,7 @@ const Home = () => {
       code: code,
       method: method,
       api_data: {
+        api_url: createApiUrl(queryParams, pathParams),
         path_params: pathParamsArray,
         content_type: content_type
       }
@@ -230,6 +254,12 @@ const Home = () => {
                 <option>DELETE</option>
               </select>
               </div>
+              <div className="flex-1 mx-4">
+                <div className="px-3 py-2 bg-gray-800 rounded-lg text-sm text-gray-400 font-mono">
+                  {createApiUrl(queryParams, pathParams)}
+                </div>
+              </div>
+
               <div className="flex items-center space-x-4">
                 <ViewToggle view={currentView} onViewChange={setCurrentView} />
                 <button

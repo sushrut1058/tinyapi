@@ -34,9 +34,9 @@ const Sidebar = () => {
         <Plus className="w-6 h-6 text-gray-300" />
       </Link>
       <Link 
-        to="/myapis"
+        to="/user/apis"
         className={`p-3 rounded-lg transition-colors ${
-          isActive('/myapis') ? 'bg-blue-600' : 'hover:bg-gray-800'
+          isActive('/user/apis') ? 'bg-blue-600' : 'hover:bg-gray-800'
         }`}
       >
         <List className="w-6 h-6 text-gray-300" />

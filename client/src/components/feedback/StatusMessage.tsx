@@ -17,7 +17,7 @@ const StatusMessage: React.FC<StatusMessageProps> = ({ type, message, onClose })
   }, [onClose]);
 
   return (
-    <div className={`fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in ${
+    <div className={`fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg flex items-center space-x-2 animate-fade-in z-[60] ${
       type === 'success' ? 'bg-green-500' : 'bg-red-500'
     } text-white`}>
       {type === 'success' ? (
