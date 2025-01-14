@@ -167,3 +167,84 @@ class TablesFetch(APIView, TableHelper):
             except Exception as e:
                 print("Exception:", e)
                 return JsonResponse({"message": "Something went wrong while fetching the table, please try again after some time..."}, status=500)
+
+class TablesDelete(APIView, TableHelper):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            user_id = request.user.id
+            table_name = request.data.get('name')
+            if table_name:
+                tableRow = Table.objects.get(table_name=table_name, user=user_id)
+                table_uuid = self.getUUID(tableRow.table_uuid)
+                tableRow.delete()
+                status = self._deleteTable(table_uuid)
+                if status:
+                    return JsonResponse({"message": f"Removed table {table_name}"}, status=200)
+                else:
+                    return JsonResponse({"message": f"Couldn't remove {table_name}"}, status=400)
+            else:
+                return JsonResponse({"message": f"Invalid request"}, status=400)
+        except:
+            return JsonResponse({"message": "Something went wrong while removing table"}, status=500)
+
+
+
+class TablesEdit(APIView, TableHelper):
+    permission_classes=[IsAuthenticated]
+
+    def post(self, request, action=None):
+        if action=="update":
+            try:
+                user_id = request.user.id
+                table_name = request.data.get('name')
+                table_row = request.data.get('row')
+                if table_name and table_row:
+                    tableRow = Table.objects.get(table_name=table_name, user=user_id)
+                    table_uuid = self.getUUID(tableRow.table_uuid)
+                    retVal = self.updateRow(table_uuid, table_row)
+                    if retVal:
+                        return JsonResponse({"message": "Row updated successfully"}, status=200)
+                    else:
+                        return JsonResponse({"message": "Couldn't update row"}, status=400)
+                else:
+                    return JsonResponse({"message": "Invalid request!"}, status=400)
+            except Exception as e:
+                return JsonResponse({"message": "Something went wrong"}, status=500)
+        elif action=="delete":
+            try:
+                user_id = request.user.id
+                table_name = request.data.get('name')
+                row_id = request.data.get('row')
+                if table_name and row_id:
+                    tableRow = Table.objects.get(table_name=table_name, user=user_id)
+                    table_uuid = self.getUUID(tableRow.table_uuid)
+                    retVal = self.deleteRow(table_uuid, row_id)
+                    if retVal:
+                        return JsonResponse({"message": "Row deleted successfully"}, status=200)
+                    else:
+                        return JsonResponse({"message": "Couldn't delete row"}, status=400)
+                else:
+                    return JsonResponse({"message": "Invalid request!"}, status=400)
+            except Exception as e:
+                return JsonResponse({"message": "Something went wrong"}, status=500)
+        elif action=="create":
+            try:
+                user_id = request.user.id
+                table_name = request.data.get('name')
+                table_row = request.data.get('row')
+                if table_name and table_row:
+                    tableRow = Table.objects.get(table_name=table_name, user=user_id)
+                    table_uuid = self.getUUID(tableRow.table_uuid)
+                    newIndex = self.createRow(table_uuid, table_row)
+                    if newIndex:
+                        return JsonResponse({"message": newIndex}, status=200)
+                    else:
+                        return JsonResponse({"message": "Couldn't delete row"}, status=400)
+                else:
+                    return JsonResponse({"message": "Invalid request!"}, status=400)
+            except Exception as e:
+                return JsonResponse({"message": "Something went wrong"}, status=500)
+        else:
+            return JsonResponse({"message": "Bad Request"}, status=400)

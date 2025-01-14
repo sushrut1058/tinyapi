@@ -5,6 +5,7 @@ import ConfirmationDialog from '../../components/ConfirmationDialog';
 import StatusMessage from '../../components/feedback/StatusMessage';
 import AuthContext from '../../contexts/AuthContext';
 import {v4 as uuidv4} from 'uuid';
+import { previousDay } from 'date-fns';
 
 interface EditableCellProps {
   field: TableField;
@@ -84,10 +85,14 @@ export const ViewTables = () => {
   const [editingRow, setEditingRow] = useState<number | null>(null);
   const [editedData, setEditedData] = useState<Record<string, any>>({});
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDeleteTableConfirm, setShowDeleteTableConfirm] = useState(false);
   const [rowToDelete, setRowToDelete] = useState<number | null>(null);
   const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [tableList, setTableList] = useState([])
+  const [tableList, setTableList] = useState([]);
+  const [isCreating, setIsCreating] = useState(false);
+  const [refreshTableList, setRefreshTableList] = useState(false);
+
   const rowsPerPage = 10;
   const url = import.meta.env.VITE_API_URL 
 
@@ -105,20 +110,16 @@ export const ViewTables = () => {
       const data = await resp.json()
       
       if(resp.status === 200){
-        console.log(data);
         const transformed_data = data['message'].map((item, index)=> ({name:item['name'], fields:item['fields'].length, id: index+1}))
-        console.log(transformed_data);
         setTableList(transformed_data);
       }else if(resp.status === 500) {
-        console.log(data);
       }
     } catch (e) {
       console.log(e);
-      // setError
     }
   }
 
-  useEffect(()=>{fetchTableList()},[])
+  useEffect(()=>{fetchTableList()},[refreshTableList])
 
   const fetchTableRecords = async (table_name: string) => {
     try{
@@ -131,10 +132,8 @@ export const ViewTables = () => {
       });
       let data = await resp.json();
       if(resp.status===200){
-        console.log(data);
-        setSelectedTable(data['message'])
-    }else if(resp.status!==500){
-        console.log('failure');
+          setSelectedTable(data['message'])
+      }else if(resp.status!==500){
       }
     }catch(e){
       console.log(e);
@@ -144,63 +143,169 @@ export const ViewTables = () => {
 
   const handleEdit = (row: any) => {
     setEditingRow(row.id);
-    setEditedData({ ...row });
+    setEditedData(prev => ({...prev, ...row }));
   };
+  
+  const handleSave = (row: any) => {
+    if (isCreating){
+      createRow(row);
+    }else{
+      updateRow(row);
+    }
+  }
 
-  const handleSave = async (row: any) => {
+  const updateRow = async (row: any) => {
     try {
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setTables(current =>
-        current.map(table => {
-          if (table === selectedTable) {
-            return {
-              ...table,
-              data: table.data.map(item =>
-                item.id === row.id ? { ...editedData } : item
-              ),
-            };
+      const response = await fetch(`${url}/tables/data/update`, {
+        method:'POST',
+        headers: {
+          'Content-Type':'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body:JSON.stringify({name:selectedTable.name, row: editedData})
+      });
+      let data = await response.json();
+      if(response.status===200){
+        setSelectedTable((prev:any) => {
+          const updatedData = prev.data.map((row) => row.id==editingRow ? {...row, ...editedData} : row);
+          return {
+            ...prev,
+            data: updatedData,
           }
-          return table;
-        })
-      );
+        }
+        )
+        setStatus({ type: 'success', message: data['message'] });
+      }else{
+        setStatus({ type: 'error', message: data['message'] });
+      }
       
       setEditingRow(null);
       setEditedData({});
-      setStatus({ type: 'success', message: 'Row updated successfully' });
+      
     } catch (error) {
-      setStatus({ type: 'error', message: 'Failed to update row' });
+      setStatus({ type: 'error', message: 'Failed to update record, something went wrong' });
     }
   };
+
+  const handleCreate = () => {
+    setIsCreating(true);
+    const newRow = {id: 999999}
+    selectedTable.fields.map((field: any) => newRow[field.name]="");
+    const updatedRows = [...selectedTable.data, newRow];
+    setSelectedTable({ ...selectedTable, data: updatedRows });
+
+    setEditingRow(newRow.id);
+    setEditedData(newRow);
+    const newTotalPages = Math.ceil(updatedRows.length / rowsPerPage);
+    if (currentPage+1 == newTotalPages) {
+      setCurrentPage(newTotalPages);
+    }
+  }
+
+  const createRow = async (row : any) => {
+    try {
+      const response = await fetch(`${url}/tables/data/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body:JSON.stringify({name:selectedTable.name, row: editedData})
+      });
+      let data = await response.json();
+
+      if(response.status===200){
+        setSelectedTable((prev:any) => {
+          const newRow = {...editedData, id:data['message']}
+          const oldTableData = prev.data.filter(item => item.id!=='')
+          const updatedData = [...oldTableData, newRow]
+          return {
+            ...prev,
+            data: updatedData,
+          }
+        }
+        )
+        setStatus({ type: 'success', message: "New record created" });
+        setIsCreating(false);
+      }else{
+        setStatus({ type: 'error', message: data['message'] });
+      }
+      setEditingRow(null);
+      setEditedData({});
+    } catch (error) {
+      setStatus({ type: 'error', message: 'Failed to create record' });
+    }
+  };
+  
 
   const handleDelete = (rowId: number) => {
     setRowToDelete(rowId);
     setShowDeleteConfirm(true);
   };
 
+  const handleDeleteTable = () => {
+    setShowDeleteTableConfirm(true);
+  };
+  
+  const confirmDeleteTable = async () => {
+    try {
+      const response = await fetch(`${url}/tables/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body:JSON.stringify({name: selectedTable.name})
+      });
+      let data = await response.json();
+
+      if(response.status===200){
+        setSelectedTable(null);
+        setRefreshTableList(true);
+        setStatus({ type: 'success', message: data['message'] });
+      }else{
+        setStatus({ type: 'error', message: data['message'] });
+      }
+      setShowDeleteTableConfirm(false);
+    } catch (error) {
+      setStatus({ type: 'error', message: 'Failed to delete table' });
+    }
+  }
+
   const confirmDelete = async () => {
     try {
-      // Simulating API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      setTables(current =>
-        current.map(table => {
-          if (table === selectedTable) {
-            return {
-              ...table,
-              data: table.data.filter(item => item.id !== rowToDelete),
-            };
+      const response = await fetch(`${url}/tables/data/delete`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`
+        },
+        body:JSON.stringify({name: selectedTable.name, row: rowToDelete})
+      });
+      let data = await response.json();
+
+      if(response.status===200){
+        setSelectedTable((prev:any) => {
+          const updatedData = prev.data.filter(item => item.id!==rowToDelete)
+          const newTotalPages = Math.ceil(updatedData.length / rowsPerPage);
+          if (currentPage > newTotalPages && currentPage > 1) {
+            setCurrentPage(newTotalPages);
           }
-          return table;
-        })
-      );
-      
+          return {
+            ...prev,
+            data: updatedData,
+          }
+        }
+        )
+        setStatus({ type: 'success', message: data['message'] });
+
+      }else{
+        setStatus({ type: 'error', message: data['message'] });
+      }
       setShowDeleteConfirm(false);
       setRowToDelete(null);
-      setStatus({ type: 'success', message: 'Row deleted successfully' });
     } catch (error) {
-      setStatus({ type: 'error', message: 'Failed to delete row' });
+      setStatus({ type: 'error', message: 'Failed to delete record' });
     }
   };
 
@@ -223,7 +328,24 @@ export const ViewTables = () => {
       [fieldName]: value
     }));
   };
-  
+
+  const handleCancel = () => {
+    if (isCreating){
+      setEditingRow(null);
+      setEditedData({});
+      setSelectedTable((prev:any) => {
+        const totalPages = Math.ceil((prev.data.length-1) / rowsPerPage);
+        if (currentPage > totalPages && currentPage > 1) {
+          setCurrentPage(totalPages);
+        }
+        return ({...prev, data:prev.data.filter((item: any)=>item.id!='')})
+      })
+      setIsCreating(false);
+    }else{
+      setEditingRow(null);
+      setEditedData({});
+    }
+  }
   return (
     <div className="max-w-6xl mx-auto mb-8">
       <div className="mb-8">
@@ -257,7 +379,20 @@ export const ViewTables = () => {
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-semibold text-gray-200">{selectedTable.name}</h2>
             <button
-              onClick={() => setSelectedTable(null)}
+              onClick={handleCreate}
+              disabled={isCreating}
+              className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              +
+            </button>
+            <button
+              onClick={handleDeleteTable}
+              className="px-3 py-3 bg-red-500 text-white rounded hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+             <Trash2 className="w-4 h-4" /> 
+            </button>
+            <button
+              onClick={() => {setSelectedTable(null); setRefreshTableList(prev => !prev)}}
               className="text-blue-400 hover:text-blue-300"
             >
               Back to tables
@@ -284,14 +419,15 @@ export const ViewTables = () => {
               </thead>
               <tbody>
                 {getPaginatedData(selectedTable.data).map((row, index) => (
-                  <tr key={uuidv4()} className="border-t border-gray-700">
+                  <tr key={row.id} className="border-t border-gray-700">
                   {selectedTable.fields.map((field) => (
                     <td key={field.name} className="px-4 py-3 text-sm text-gray-300">
                       <EditableCell
                         field={field}
                         value={editingRow === row.id ? editedData[field.name] : row[field.name]}
                         isEditing={editingRow === row.id}
-                        onChange={(value) => handleCellChange(field.name, value)}
+                        onChange={(value)=>handleCellChange(field.name, value)}
+                        // onChange={(value) => setEditedData({ ...editedData, [field.name]: value })}
                       />
                     </td>
                     ))}
@@ -308,8 +444,7 @@ export const ViewTables = () => {
                             </button>
                             <button
                               onClick={() => {
-                                setEditingRow(null);
-                                setEditedData({});
+                                handleCancel();
                               }}
                               className="p-1 text-red-400 hover:text-red-300"
                               title="Cancel"
@@ -344,7 +479,15 @@ export const ViewTables = () => {
                   </div>
               </div>
             </div>
-
+            <ConfirmationDialog
+              isOpen={showDeleteTableConfirm}
+              title={`Delete Table ${selectedTable.name}`}
+              message={`Are you sure you want to delete table: ${selectedTable.name}? This action cannot be undone.`}
+              onConfirm={confirmDeleteTable}
+              onCancel={() => {
+                setShowDeleteTableConfirm(false);
+              }}
+            />
             {/* Pagination */}
             {totalPages > 1 && (
               <div className="mt-auto border-t border-gray-700">
@@ -388,14 +531,17 @@ export const ViewTables = () => {
 
       <ConfirmationDialog
         isOpen={showDeleteConfirm}
-        title="Delete Row"
-        message="Are you sure you want to delete this row? This action cannot be undone."
+        title="Delete Record"
+        message="Are you sure you want to delete this record? This action cannot be undone."
         onConfirm={confirmDelete}
         onCancel={() => {
           setShowDeleteConfirm(false);
           setRowToDelete(null);
         }}
       />
+
+      
+      
 
       {status && (
         <StatusMessage
