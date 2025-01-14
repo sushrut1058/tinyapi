@@ -1,9 +1,9 @@
 import React, { useContext, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import ConfirmationDialog from '../ConfirmationDialog';
-import Banner from '../Banner';
 import ErrorMessage from '../ErrorMessage';
 import AuthContext from '../../contexts/AuthContext';
+import StatusMessage from '../../components/feedback/StatusMessage';
 
 interface Field {
   name: string;
@@ -16,7 +16,7 @@ export const CreateTable = () => {
   const [tableName, setTableName] = useState('');
   const [fields, setFields] = useState<Field[]>([{ name: '', type: 'string' }]);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [showBanner, setShowBanner] = useState(false);
+  const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const {accessToken} = useContext(AuthContext);
@@ -85,7 +85,7 @@ export const CreateTable = () => {
       if(resp.status === 201){
         const data = await resp.json();
         console.log(data);
-        setShowBanner(true);
+        setStatus({ type: 'success', message: data['message'] });
       }else if(resp.status === 400) {
         const data = await resp.json();
         console.log(data);
@@ -177,10 +177,11 @@ export const CreateTable = () => {
         onCancel={() => setShowConfirmation(false)}
       />
 
-      {showBanner && (
-        <Banner
-          message={`Table "${tableName}" created successfully!`}
-          onClose={() => setShowBanner(false)}
+      {status && (
+        <StatusMessage
+          type={status.type}
+          message={status.message}
+          onClose={() => setStatus(null)}
         />
       )}
 
