@@ -5,7 +5,9 @@ import EditorTabs from './EditorTabs';
 
 interface CodeEditorWithTabsProps {
   value: string;
+  bodyValue: string;
   onChange: (value: string) => void;
+  onBodyChange: (value: string) => void;
 }
 
 interface Tab {
@@ -13,11 +15,12 @@ interface Tab {
   title: string;
   content: string;
   isTemplate: boolean;
+  body: string;
 }
 
-const CodeEditorWithTabs: React.FC<CodeEditorWithTabsProps> = ({ value, onChange }) => {
+const CodeEditorWithTabs: React.FC<CodeEditorWithTabsProps> = ({ value, bodyValue, onChange, onBodyChange }) => {
   const [tabs, setTabs] = useState<Tab[]>([
-    { id: 'main', title: 'api.py', content: value, isTemplate: false }
+    { id: 'main', title: 'api.py', content: value, body: bodyValue, isTemplate: false }
   ]);
   const [activeTab, setActiveTab] = useState('main');
   const [mainTabContent, setMainTabContent] = useState(value);
@@ -35,7 +38,14 @@ const CodeEditorWithTabs: React.FC<CodeEditorWithTabsProps> = ({ value, onChange
       );
       localStorage.setItem('api_code',value);
     }
-  }, [value]);
+    if (activeTab=='main' && mainTab && mainTab.body !== bodyValue) {
+      setTabs(current => 
+        current.map(tab => 
+          tab.id === 'main' ? { ...tab, body: bodyValue } : tab
+        )
+      );
+    }
+  }, [value, bodyValue]);
 
   useEffect(()=>{onChange(localStorage.getItem('api_code'))},[])
 
@@ -43,15 +53,18 @@ const CodeEditorWithTabs: React.FC<CodeEditorWithTabsProps> = ({ value, onChange
     const existingTab = tabs.find(tab => tab.id === template.id);
     if (existingTab) {
       setActiveTab(template.id);
+      onBodyChange(template.body);
     } else {
       const newTab: Tab = {
         id: template.id,
         title: template.name,
         content: template.code,
-        isTemplate: true
+        isTemplate: true,
+        body: template.body
       };
       setTabs(current => [...current, newTab]);
       setActiveTab(template.id);
+      onBodyChange(template.body);
       // Ensure the correct tab is updated after setting the active tab
       handleEditorChange(template.code, template.id);
     }
@@ -65,6 +78,7 @@ const CodeEditorWithTabs: React.FC<CodeEditorWithTabsProps> = ({ value, onChange
     
     if (activeTab === tabId) {
       setActiveTab('main');
+      onBodyChange(activeBody);
     }
   };
   
@@ -78,7 +92,7 @@ const CodeEditorWithTabs: React.FC<CodeEditorWithTabsProps> = ({ value, onChange
         tab.id === tabId ? { ...tab, content } : tab
       )
     );
-
+    // onBodyChange(activeBody);
     if (activeTab === 'main') {
       onChange(content);
     }
@@ -86,12 +100,21 @@ const CodeEditorWithTabs: React.FC<CodeEditorWithTabsProps> = ({ value, onChange
 
   const activeContent = tabs.find(tab => tab.id === activeTab)?.content || '';
 
+  const handleTabChange = (activeTab) => {
+    setActiveTab(activeTab);
+    const b = tabs.filter(item=>item.id==activeTab);
+    console.log(activeTab, b[0])
+    if(b.length){
+      onBodyChange(b[0].body);
+    }
+  }
+
   return (
     <div className="h-[calc(100vh-14rem)] flex flex-col bg-gray-900 rounded-lg overflow-hidden">
       <EditorTabs
         tabs={tabs}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         onTabClose={handleTabClose}
       />
       

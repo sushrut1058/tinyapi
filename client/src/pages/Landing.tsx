@@ -41,7 +41,7 @@ const Landing = () => {
               className="absolute text-xs md:text-sm font-mono text-gray-500 opacity-60"
               style={{ top: `${i * 10}%`, left: `${Math.random() * 50}%` }}
             >
-              {`const api = new TinyAPI();
+              {`const api = new tinyAPI();
 await api.deploy({
 route: '/users',
 method: 'POST',
@@ -67,7 +67,7 @@ return { status: 'success', data: user };
         {/* CTA Section */}
         <div className="bg-gray-800/60 backdrop-blur-lg p-6 rounded-xl shadow-lg border border-gray-700 w-full max-w-md">
           <p className="text-lg font-semibold text-gray-200 mb-4">
-            Get started with TinyAPI today
+            Get started with tinyAPI today
           </p>
           <div className="flex justify-center">
             <GoogleLogin
@@ -115,7 +115,7 @@ return { status: 'success', data: user };
 
       {/* Footer */}
       <footer className="absolute bottom-4 text-gray-400 text-sm text-center w-full">
-        <p>© {new Date().getFullYear()} TinyAPI. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} tinyAPI. All rights reserved.</p>
       </footer>
     </div>
   ) : (

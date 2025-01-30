@@ -5,6 +5,7 @@ export interface Template {
   id: string;
   name: string;
   code: string;
+  body: string;
   description: string;
 }
 
@@ -23,7 +24,7 @@ import re, hashlib
 class API:
     def __init__(self, db):
         db.connect()
-        self.table = db.load("dum")
+        self.table = db.load("Users")
 
     def handler(self, Request, Response):
         # Get user details
@@ -67,25 +68,28 @@ class API:
                 return Response({"error":"Internal server error"}, 500)
             
         except Exception as e:
-            return Response({"error": str(e)}, 500)
-        
-# {
-#     "username":"sushrut1058",
-#     "email": "sushrut1058@gmail.com",
-#     "password":"3dsrfsfsffs242"
-# }`
+            return Response({"error": str(e)}, 500)`,
+    body: `{
+  "username":"sam",
+  "email": "sam123@gmail.com",
+  "password":"pizza123"
+}`
   },
   {
     id: 'user-login',
     name: 'User Login',
     description: 'POST endpoint with user login along with validation',
+    body:`{
+  "email": "sam123@gmail.com",
+  "password":"pizza123"
+}`,
     code: `import re, hashlib, jwt, sys
 from datetime import datetime, timedelta
 
 class API:
     def __init__(self, db):
         db.connect()
-        self.table = db.load("dum")
+        self.table = db.load("Users")
     
     def generate_jwt(self, email):
         """Generate a JWT for the user."""
@@ -130,6 +134,10 @@ class API:
   {
     id: 'token-generate',
     name: 'Generate & Refresh Tokens',
+    body: `{
+  "action":"refresh",
+  "token":"jwt.goes.here"
+}`,
     description: 'Endpoint for basic authentication functions',
     code: `import re, jwt, datetime
 

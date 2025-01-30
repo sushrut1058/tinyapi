@@ -52,18 +52,15 @@ const Home = () => {
   const [apiUrl, setApiUrl] = useState<string>("");
   
   const {accessToken, user} = useContext(AuthContext);
-  console.log(accessToken, user);
   const url = import.meta.env.VITE_API_URL //"http://localhost:5000"
   
   const createApiUrl = (queryParamsVar: {id:number, key: string, value:string}[]|[], pathParamsVar: {id:number, key: string, value:string}[]|[]) => {
     const qObj = queryParamsVar.filter(item => item.key!=="").reduce((accumulator, item, index) =>{
       return accumulator + `${index > 0 ? '&' : ''}${item.key}=[]`; 
     }, '')
-    console.log(qObj);
     const pObj = pathParamsVar.filter(item => item.key!=='').reduce((accumulator, item, index) => {
       return accumulator + `${index > 0 ? '/' : ''}:${item.key}`;
     }, '')
-    console.log(pObj, pathParamsVar.filter(item => item.key!==''))
     const finalPath = pObj + `${qObj==='' ? '' : '?'}${qObj}`;
     // setApiUrl(`/${finalPath}`);
     return '/'+finalPath;
@@ -221,6 +218,10 @@ const Home = () => {
     return body
   }
 
+  const handleTemplateChange = (code: string, body: string) => {
+    setCode(code);
+    setBody(body);
+  }
   
 
   return (
@@ -287,7 +288,7 @@ const Home = () => {
 
             <div className="grid grid-cols-7 gap-6">
               <div className="col-span-5">
-                <CodeEditorWithTabs value={code} onChange={setCode} />
+                <CodeEditorWithTabs value={code} onChange={setCode} bodyValue={body} onBodyChange={setBody}/>
               </div>
               <div className="col-span-2 h-[calc(100vh-14rem)] overflow-y-auto">
                 {currentView === 'tables' ? (

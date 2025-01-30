@@ -15,7 +15,7 @@ interface EditorTabsProps {
   onTabClose: (tabId: string) => void;
 }
 
-const EditorTabs: React.FC<EditorTabsProps> = ({
+export const EditorTabs: React.FC<EditorTabsProps> = ({
   tabs,
   activeTab,
   onTabChange,

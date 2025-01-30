@@ -1,5 +1,6 @@
 import React from 'react';
 import ParameterInput from './parameters/ParameterInput';
+import Editor from "@monaco-editor/react";
 
 interface RequestPayloadProps {
   headers: { id: string; key: string; value: string }[];
@@ -49,11 +50,27 @@ const RequestPayload: React.FC<RequestPayloadProps> = ({
 
           <div className="space-y-2">
             <h3 className="text-gray-300 text-sm font-semibold">Body</h3>
-            <textarea
+            <Editor
+              height="8rem"
+              defaultLanguage="json"
               value={body}
-              onChange={(e) => onBodyChange(e.target.value)}
-              className="w-full h-32 bg-gray-800 text-gray-300 text-sm font-mono rounded p-2 resize-none focus:outline-none focus:ring-1 focus:ring-blue-500"
-              placeholder="Request body (JSON)"
+              onChange={(value) => onBodyChange(value || '')}
+              theme="vs-dark"
+              options={{
+                minimap: { enabled: false },
+                fontSize: 14,
+                scrollBeyondLastLine: false,
+                wordWrap: "on",
+                wrappingIndent: "indent",
+                automaticLayout: true,
+                formatOnPaste: true,
+                formatOnType: true,
+                lineNumbers: "on",
+                lineNumbersMinChars: 3,
+                glyphMargin: false,
+                folding: true,
+                lineDecorationsWidth: 10,
+              }}
             />
           </div>
         </div>
