@@ -21,8 +21,10 @@ func ApiServe(c *gin.Context) {
 
 	//query params
 	queryParams_raw := c.Request.URL.Query()
-	var queryParams map[string]any
+	queryParams := make(map[string]any)
+	log.Print("raw: ", queryParams_raw)
 	for query, values := range queryParams_raw {
+		log.Print("query: ", query, " values: ", values)
 		queryParams[query] = values[0]
 	}
 
