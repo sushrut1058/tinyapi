@@ -23,6 +23,9 @@ def create_default_tables(id, tearDown=TableHelper()._TableHelper__tearDown):
             ],
             'user':id
         }
+
+        table_data = TableHelper()._addIDField(table_data)
+        
         print(table_data)
         table_serializer = TableSerializer(data=table_data)
         if table_serializer.is_valid():
