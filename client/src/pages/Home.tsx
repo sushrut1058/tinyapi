@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import CodeEditorWithTabs from '../components/code-editor/CodeEditorWithTabs';
 import RequestPayload from '../components/RequestPayload';
 import Terminal from '../components/terminal/Terminal';
@@ -19,26 +19,13 @@ interface StatusMessage {
 }
 
 const Home = () => {
-  const templateCodeRef = useRef(`class API:
-    def __init__(self, db):
-        db.connect()
-        table = db.load("dum")
-
-    def handle(self, request):
-        # Get user details
-        return {"Response":{"message": "Hit!"},"Status":200}
-  `)
-  const templateBodyRef = useRef(`{
-  "test":123
-}`)
-
   const [method, setMethod] = useState('GET');
-  const [code, setCode] = useState(templateCodeRef.current);
+  const [code, setCode] = useState();
   const [apiName, setApiName] = useState('');
   const [headers, setHeaders] = useState([{ id: 1, key: 'Content-Type', value: 'application/json' }]);
   const [queryParams, setQueryParams] = useState<{id:number, key: string, value:string}[]|[]>([]);
   const [pathParams, setPathParams] = useState<{id:number, key: string, value:string}[]|[]>([]);
-  const [body, setBody] = useState(templateBodyRef.current);
+  const [body, setBody] = useState();
   const [response, setResponse] = useState<string | null>(null);
   const [showDeployConfirm, setShowDeployConfirm] = useState(false);
   const [status, setStatus] = useState<StatusMessage | null>(null);

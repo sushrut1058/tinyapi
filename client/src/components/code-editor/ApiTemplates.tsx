@@ -14,6 +14,72 @@ interface ApiTemplatesProps {
 }
 
 const templates: Template[] = [
+    {
+        id: 'db-interactions',
+        name: 'Database Operations',
+        body: ``,
+        description: 'CRUD operations on your tables',
+        code: `class API:
+    def __init__(self, db):
+        db.connect()
+        self.users = db.load("Users")
+
+    def handler(self, Request, Response):
+
+        # 1. INSERT operation - Adding a new user
+        new_user = {"email":"sam@gmail.com", "username":"sam", "password":"ilovepizza"}
+        is_insert_success, affected_rows_insert = self.users.insert(new_user)
+
+        # 2. FETCH operation - Retrieving a user based on username and password
+        search_criteria = {"username":"sam","password":"ilovepizza"}
+        retrieved_users = self.users.fetch(search_criteria)
+
+        # 3. UPDATE operation - Updating the email and username for a specific user
+        update_filter = {"username":"sam"}
+        updated_user = {"username":"sam_123", "email":"sam_123@gmail.com"}
+        is_update_success, affected_rows_update = self.users.update(update_filter, updated_user)
+
+        # 4. DELETE operation - Removing a user based on username
+        delete_filter = {"username":"sam"}
+        is_delete_success, affected_rows_delete = self.users.delete(delete_filter)        
+
+        response_data = {
+            "insert": {"success": is_insert_success, "rows_affected": affected_rows_insert},
+            "fetch": {"users_found": retrieved_users},
+            "update": {"success": is_update_success, "rows_affected": affected_rows_update},
+            "delete": {"success": is_delete_success, "rows_affected": affected_rows_delete},
+        }
+
+        return Response(response_data, status=200) `
+    },
+    
+    {
+        id: 'parameter-extract',
+        name: 'URL Parameter Extraction',
+        body: ``,
+        description: 'Extract query and search parameter values',
+        code: `class API:
+    def __init__(self, db):
+        pass
+
+    def handler(self, Request, Response):
+        # Extracting query parameters (example: ?q1=value1&q2=value2)
+        query_param1 = Request.query.get("q1", "default_value")  # Use default to avoid None
+        query_param2 = Request.query.get("q2", "default_value")
+
+        # Extracting path parameters (example: /items/:path1/:path2)
+        path_param1 = Request.params.get("path1", "default_value")
+        path_param2 = Request.params.get("path2", "default_value")
+
+        # Example response including extracted parameters
+        response_data = {
+            "message": "API hit successfully",
+            "query_params": {"q1": query_param1, "q2": query_param2},
+            "path_params": {"path1": path_param1, "path2": path_param2},
+        }
+
+        return Response(response_data, status=200)  `
+    },
   {
     id: 'user-reg',
     name: 'User Registration',

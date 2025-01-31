@@ -26,10 +26,31 @@ const CodeEditorWithTabs: React.FC<CodeEditorWithTabsProps> = ({ value, bodyValu
   const [mainTabContent, setMainTabContent] = useState(value);
   
   const activeTabRef = useRef("main")
+  const templateCodeRef = useRef(`class API:
+      def __init__(self, db):
+          """
+          Args:
+              db: Database connection
+          """
+          db.connect() # Refer to the templates for some examples!  
+  
+      def handler(self, Request, Response):
+          """
+          Handle incoming requests.
+  
+          Args:
+              Request: Incoming request object containing parameters and query strings.
+              Response: Response object used to send back the API response.
+  
+          Returns:
+              Response object with the appropriate status code.
+          """
+          return Response({"response":"Pong?"}, status=200)`)
 
 //   Keep main tab in sync with parent value
   useEffect(() => {    
     const mainTab = tabs.find(tab => tab.id === 'main');
+    console.log(activeTab, value,"$$$$$$$$", activeContent);
     if (activeTab=='main' && mainTab && mainTab.content !== value) {
       setTabs(current => 
         current.map(tab => 
@@ -45,9 +66,17 @@ const CodeEditorWithTabs: React.FC<CodeEditorWithTabsProps> = ({ value, bodyValu
         )
       );
     }
-  }, [value, bodyValue]);
+  }, [value]);
 
-  useEffect(()=>{onChange(localStorage.getItem('api_code'))},[])
+  useEffect(()=>{
+    const progress = localStorage.getItem('api_code');
+    if (progress){
+      onChange(progress)
+    } else {
+      onChange(templateCodeRef.current);
+    }
+    
+  },[])
 
   const handleTemplateSelect = (template: Template) => {
     const existingTab = tabs.find(tab => tab.id === template.id);
@@ -78,11 +107,15 @@ const CodeEditorWithTabs: React.FC<CodeEditorWithTabsProps> = ({ value, bodyValu
     
     if (activeTab === tabId) {
       setActiveTab('main');
-      onBodyChange(activeBody);
+      const b = tabs.filter(item=>item.id=='main');
+      if(b.length){
+        onBodyChange(b[0].body);
+      }
     }
   };
   
   const handleEditorChange = (newValue: string | undefined, currentTab?: string) => {
+    console.log("xxxxx")
     const content = newValue || '';
     let tabId;
     currentTab? tabId=currentTab: tabId=activeTab;
