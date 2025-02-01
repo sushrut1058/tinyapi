@@ -103,7 +103,7 @@ export const CreateTable = () => {
   };
 
   return (
-    <>
+    <div className="overflow-y-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="tableName" className="block text-sm font-medium text-gray-300 mb-2">
@@ -191,7 +191,7 @@ export const CreateTable = () => {
           onClose={() => setError(null)}
         />
       )}
-    </>
+    </div>
   );
 };
 

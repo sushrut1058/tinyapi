@@ -125,7 +125,7 @@ const MyApisPage = () => {
   return (
     <div className="max-w-6xl mx-auto p-6">
       <div className="bg-gray-900 rounded-lg p-6">
-        <h2 className="text-xl font-semibold text-gray-200 mb-6">API List</h2>
+        <h2 className="text-xl font-semibold text-gray-200 mb-6">Deployed APIs</h2>
         <ApiList apis={apis} onEdit={handleApiEdit} />
       </div>
       {status && (

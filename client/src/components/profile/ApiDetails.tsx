@@ -71,7 +71,7 @@ export const ApiDetails: React.FC<ApiDetailsProps> = ({
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-6">
         <div>
-          <h3 className="text-lg font-semibold text-gray-200 mb-4">API List</h3>
+          <h3 className="text-lg font-semibold text-gray-200 mb-4">Deployed APIs</h3>
           <div className="space-y-2">
             {apis.map((api, index) => (
               <button
