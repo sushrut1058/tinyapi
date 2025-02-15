@@ -13,8 +13,8 @@ def generate_unique_endpoint():
         if not Api.objects.filter(endpoint=random_endpoint).exists():
             return random_endpoint
 
-def generate_api_hash(code, method, api_data):
-    target = "CODE:"+str(code)+"\nMETHOD:"+method+"\nAPIDATA:"+api_data
+def generate_api_hash(code, method, api_data, user_id):
+    target = "CODE:"+str(code)+"\nMETHOD:"+method+"\nAPIDATA:"+api_data+"\nUSER:"+str(user_id)
     return md5(target.encode("utf-8")).hexdigest()
 
 
@@ -33,7 +33,7 @@ class Api(models.Model):
     def save(self, *args, **kwargs):
         if not self.endpoint:
             self.endpoint = generate_unique_endpoint()
-        self.api_hash = generate_api_hash(self.code, self.method, self.api_data)
+        self.api_hash = generate_api_hash(self.code, self.method, self.api_data, self.user)
         try:
             with transaction.atomic():
                 super(Api, self).save(*args, **kwargs)
