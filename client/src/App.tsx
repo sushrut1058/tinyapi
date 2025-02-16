@@ -1,27 +1,23 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
-import Sidebar from './components/Sidebar';
 import Home from './pages/Home';
-import Profile from './pages/Profile';
-import TablesView from './components/tables/TablesView';
+import {ViewTables} from './pages/tables/ViewTables';
+import {CreateTablePage} from './pages/tables/CreateTablePage';
+import MyApisPage from './pages/MyApis';
+import Landing from './pages/Landing';
+import PrivateRoute from './routes/PrivateRoute';
 
 function App() {
   return (
     <Router>
-      <div className="min-h-screen bg-gray-950">
-        <Sidebar />
-        <Header />
-        <main className="pt-16 pl-16">
-          <div className="p-8">
+      
             <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/tables" element={<TablesView />} />
-              <Route path="/profile" element={<Profile />} />
+              <Route path="/" element={<Landing />} />
+              <Route path="/home" element={<PrivateRoute><Home /></PrivateRoute>} />
+              <Route path="/tables/view" element={<PrivateRoute><ViewTables /></PrivateRoute>} />
+              <Route path="/tables/create" element={<PrivateRoute><CreateTablePage /></PrivateRoute>} />
+              <Route path="/user/apis" element={<PrivateRoute><MyApisPage /></PrivateRoute>} />
             </Routes>
-          </div>
-        </main>
-      </div>
     </Router>
   );
 }

@@ -1,3 +1,4 @@
+from datetime import timedelta
 """
 Django settings for app project.
 
@@ -25,20 +26,23 @@ SECRET_KEY = 'django-insecure-d!=hb%@lw@o^^9_%3^-$i_nuj_z(-6-f2%6(%yyiaeqt8^v!if
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["tinyapi.xyz", "localhost"]
 CORS_ALLOW_ALL_ORIGINS = True
-
+AUTH_USER_MODEL = "users.CustomUser"
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    # 'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'deploy',
-    'corsheaders'
+    'users',
+    'corsheaders',
+    'rest_framework',
+    'rest_framework_simplejwt',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +55,15 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+}
 
 ROOT_URLCONF = 'app.urls'
 
@@ -79,17 +92,17 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DB1_DIR = BASE_DIR.parent / 'db' / 'private'
-DB2_DIR = BASE_DIR.parent / 'db' / 'mount'
+DB1_DIR = '/db/private'
+DB2_DIR = '/db/mount'
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DB1_DIR / 'db.sqlite3',
+        'NAME': '/db/private/db.sqlite3',
     },
     'user_tables': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': DB2_DIR / 'user_tables.sqlite3',
+        'NAME': '/db/mount/user_tables.sqlite3',
     }
 }
 
@@ -135,3 +148,11 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Lifetime of access tokens
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),    # Lifetime of refresh tokens
+    'ROTATE_REFRESH_TOKENS': True,                 # Automatically issue a new refresh token on use
+    'BLACKLIST_AFTER_ROTATION': True,              # Blacklist old refresh tokens after rotation
+}

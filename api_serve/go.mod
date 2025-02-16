@@ -7,6 +7,7 @@ toolchain go1.23.4
 require (
 	github.com/docker/docker v25.0.0+incompatible
 	github.com/gin-gonic/gin v1.10.0
+	github.com/mattn/go-sqlite3 v1.14.24
 )
 
 replace github.com/docker/distribution => github.com/distribution/distribution v2.8.0+incompatible
@@ -35,7 +36,6 @@ require (
 	github.com/klauspost/cpuid/v2 v2.2.7 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-sqlite3 v1.14.24 // indirect
 	github.com/moby/term v0.5.0 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import ConfirmationDialog from '../ConfirmationDialog';
-import Banner from '../Banner';
 import ErrorMessage from '../ErrorMessage';
+import AuthContext from '../../contexts/AuthContext';
+import StatusMessage from '../../components/feedback/StatusMessage';
 
 interface Field {
   name: string;
@@ -15,9 +16,12 @@ export const CreateTable = () => {
   const [tableName, setTableName] = useState('');
   const [fields, setFields] = useState<Field[]>([{ name: '', type: 'string' }]);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [showBanner, setShowBanner] = useState(false);
+  const [status, setStatus] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const url = "http://localhost:5000"
+
+  const {accessToken} = useContext(AuthContext);
+  const url = import.meta.env.VITE_API_URL //"http://localhost:5000"
+
   const addField = () => {
     setFields([...fields, { name: '', type: 'string' }]);
   };
@@ -72,7 +76,8 @@ export const CreateTable = () => {
       const resp = await fetch(`${url}/tables/create`, {
         method: "POST",
         headers: {
-            "Content-Type":"application/json"
+            "Content-Type":"application/json",
+            "Authorization":`Bearer ${accessToken}`
         },
         body: JSON.stringify({"table_name": tableName,"table_columns":fields})
       });
@@ -80,11 +85,11 @@ export const CreateTable = () => {
       if(resp.status === 201){
         const data = await resp.json();
         console.log(data);
-        setShowBanner(true);
+        setStatus({ type: 'success', message: data['message'] });
       }else if(resp.status === 400) {
         const data = await resp.json();
         console.log(data);
-        setError('Invalid data provided.')
+        setError(data.message)
       }else if(resp.status === 500) {
         const data = await resp.json();
         console.log(data);
@@ -98,7 +103,7 @@ export const CreateTable = () => {
   };
 
   return (
-    <>
+    <div className="overflow-y-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label htmlFor="tableName" className="block text-sm font-medium text-gray-300 mb-2">
@@ -172,10 +177,11 @@ export const CreateTable = () => {
         onCancel={() => setShowConfirmation(false)}
       />
 
-      {showBanner && (
-        <Banner
-          message={`Table "${tableName}" created successfully!`}
-          onClose={() => setShowBanner(false)}
+      {status && (
+        <StatusMessage
+          type={status.type}
+          message={status.message}
+          onClose={() => setStatus(null)}
         />
       )}
 
@@ -185,7 +191,7 @@ export const CreateTable = () => {
           onClose={() => setError(null)}
         />
       )}
-    </>
+    </div>
   );
 };
 

@@ -1,0 +1,28 @@
+version: '3.9'
+services:
+  # api_serve:
+  #   build:
+  #     context: ./api_serve
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./api_serve:/api_serve
+  #     - ./db:/db
+  #   ports:
+  #     - "8080:8080"
+  
+  app:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    volumes:
+      - ./app:/app
+      - ./db:/db
+    ports:
+      - "5000:5000"
+  
+  vite-app:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"

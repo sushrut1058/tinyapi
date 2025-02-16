@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import CodeEditor from '../components/CodeEditor';
+import React, { useState, useEffect, useContext } from 'react';
+import CodeEditorWithTabs from '../components/code-editor/CodeEditorWithTabs';
 import RequestPayload from '../components/RequestPayload';
 import Terminal from '../components/terminal/Terminal';
 import StatusMessage from '../components/feedback/StatusMessage';
@@ -10,6 +10,8 @@ import CreateTable from '../components/tables/CreateTable';
 import { ViewToggle } from '../components/ViewToggle';
 import { Play, Upload, X } from 'lucide-react';
 import { Table } from '../types/tables';
+import EndpointBanner from '../components/EndpointBanner';
+import AuthContext from '../contexts/AuthContext';
 
 interface StatusMessage {
   type: 'success' | 'error';
@@ -17,64 +19,48 @@ interface StatusMessage {
 }
 
 const Home = () => {
-  const templateCodeRef = useRef(`class API:
-    def __init__(self, db):
-        db.connect()
-        table = db.load("dum")
-
-    def handle(self, request):
-        # Get user details
-        return {"Response":{"message": "Hit!"},"Status":200}
-  `)
-  const templateBodyRef = useRef(`{
-  "test":123
-}`)
-
   const [method, setMethod] = useState('GET');
-  const [code, setCode] = useState(templateCodeRef.current);
+  const [code, setCode] = useState();
+  const [apiName, setApiName] = useState('');
   const [headers, setHeaders] = useState([{ id: 1, key: 'Content-Type', value: 'application/json' }]);
-  const [queryParams, setQueryParams] = useState<{id:number, key: string, value:string}|[]>([]);
+  const [queryParams, setQueryParams] = useState<{id:number, key: string, value:string}[]|[]>([]);
   const [pathParams, setPathParams] = useState<{id:number, key: string, value:string}[]|[]>([]);
-  const [body, setBody] = useState(templateBodyRef.current);
+  const [body, setBody] = useState();
   const [response, setResponse] = useState<string | null>(null);
   const [showDeployConfirm, setShowDeployConfirm] = useState(false);
   const [status, setStatus] = useState<StatusMessage | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [stderr, setStderr] = useState<string | null>(null);
-  const url = "http://localhost:5000"
   const [showCreateTable, setShowCreateTable] = useState(false);
   const [selectedTable, setSelectedTable] = useState<Table | null>(null);
   const [currentView, setCurrentView] = useState<'tables' | 'payload'>('payload');
+  const [deployedEndpoint, setDeployedEndpoint] = useState<string | null>(null);
+  const [tables, setTables] = useState<Table[]>([]);
+  const [apiUrl, setApiUrl] = useState<string>("");
+  
+  const {accessToken, user} = useContext(AuthContext);
+  const url = import.meta.env.VITE_API_URL //"http://localhost:5000"
+  
+  const createApiUrl = (queryParamsVar: {id:number, key: string, value:string}[]|[], pathParamsVar: {id:number, key: string, value:string}[]|[]) => {
+    const qObj = queryParamsVar.filter(item => item.key!=="").reduce((accumulator, item, index) =>{
+      return accumulator + `${index > 0 ? '&' : ''}${item.key}=[]`; 
+    }, '')
+    const pObj = pathParamsVar.filter(item => item.key!=='').reduce((accumulator, item, index) => {
+      return accumulator + `${index > 0 ? '/' : ''}:${item.key}`;
+    }, '')
+    const finalPath = pObj + `${qObj==='' ? '' : '?'}${qObj}`;
+    // setApiUrl(`/${finalPath}`);
+    return '/'+finalPath;
 
-  // Dummy data for demonstration
-  const [tables, setTables] = useState<Table[]>([
-    {
-      name: 'users',
-      fields: [
-        { name: 'id', type: 'uuid' },
-        { name: 'email', type: 'string' },
-        { name: 'created_at', type: 'timestamp' },
-      ],
-      data: []
-    },
-    {
-      name: 'posts',
-      fields: [
-        { name: 'id', type: 'uuid' },
-        { name: 'title', type: 'string' },
-        { name: 'content', type: 'text' },
-        { name: 'user_id', type: 'uuid' },
-      ],
-      data: []
-    }
-  ]);
+  }
 
   const fetchTableList = async () => {
     try{
-      const resp = await fetch(`${url}/tables/list`,{
+      const resp = await fetch(`${url}/tables/list/schema/`,{
         'method':'GET',
         'headers':{
-          'Content-Type':'application/json'
+          'Content-Type':'application/json',
+          'Authorization':`Bearer ${accessToken}`
         }
       });
       const data = await resp.json()
@@ -126,7 +112,8 @@ const Home = () => {
       const resp = await fetch(`${url}/test`, {
         method: "POST",
         headers: {
-          'Content-Type':'application/json'
+          'Content-Type':'application/json',
+          'Authorization':`Bearer ${accessToken}`
         },
         body: JSON.stringify(reqBody)
       })
@@ -152,6 +139,13 @@ const Home = () => {
       });
       return;
     }
+    if (!apiName) {
+      setStatus({
+        type: 'error',
+        text: 'Please assign a name to your API'
+      });
+      return;
+    }
     setShowDeployConfirm(true);
   };
 
@@ -164,7 +158,8 @@ const Home = () => {
       const resp = await fetch(`${url}/deploy`, {
         method: "POST",
         headers: {
-          'Content-Type':'application/json'
+          'Content-Type':'application/json',
+          'Authorization': `Bearer ${accessToken}`
         },
         body: JSON.stringify({body})
       })
@@ -173,8 +168,9 @@ const Home = () => {
       if(resp.ok){
         setStatus({
           type: 'success',
-          text: data.message
+          text: `Successfully deployed API ${apiName}`
         });
+        setDeployedEndpoint(data.message);
       }else{
         setStatus({
           type: 'error',
@@ -197,9 +193,11 @@ const Home = () => {
     const pathParamsArray = (pathParams.filter((item) => item.key!="")).map((item)=>item.key)
 
     const body = {
+      api_name: apiName,
       code: code,
       method: method,
       api_data: {
+        api_url: createApiUrl(queryParams, pathParams),
         path_params: pathParamsArray,
         content_type: content_type
       }
@@ -207,12 +205,32 @@ const Home = () => {
     return body
   }
 
+  const handleTemplateChange = (code: string, body: string) => {
+    setCode(code);
+    setBody(body);
+  }
+  
+
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100 pl-16">
+      {deployedEndpoint && (
+        <EndpointBanner 
+          endpoint={deployedEndpoint}
+          onClose={() => setDeployedEndpoint(null)}
+        />
+      )}
       <div className="h-screen overflow-hidden">
         <div className="p-6">
           <div className="space-y-4">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center justify-between">
+              <div className="space-x-4">
+              <input
+                    type="text"
+                    value={apiName}
+                    onChange={(e) => setApiName(e.target.value)}
+                    placeholder="API Name *"
+                    className="w-64 bg-gray-800 text-gray-300 px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
               <select
                 value={method}
                 onChange={(e) => setMethod(e.target.value)}
@@ -223,35 +241,43 @@ const Home = () => {
                 <option>PUT</option>
                 <option>DELETE</option>
               </select>
-              <ViewToggle view={currentView} onViewChange={setCurrentView} />
-              <div className="flex-1" />
-              <button
-                onClick={handleTest}
-                disabled={isLoading}
-                className={`flex items-center space-x-2 bg-blue-600 px-4 py-2 rounded-lg transition-colors ${
-                  isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
-                }`}
-              >
-                <Play className="w-4 h-4" />
-                <span>{isLoading ? 'Testing...' : 'Test'}</span>
-              </button>
-              <button
-                onClick={handleDeploy}
-                disabled={isLoading}
-                className={`flex items-center space-x-2 bg-green-600 px-4 py-2 rounded-lg transition-colors ${
-                  isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'
-                }`}
-              >
-                <Upload className="w-4 h-4" />
-                <span>{isLoading ? 'Deploying...' : 'Deploy'}</span>
-              </button>
+              </div>
+              <div className="flex-1 mx-4">
+                <div className="px-3 py-2 bg-gray-800 rounded-lg text-sm text-gray-400 font-mono">
+                  {createApiUrl(queryParams, pathParams)}
+                </div>
+              </div>
+
+              <div className="flex items-center space-x-4">
+                <ViewToggle view={currentView} onViewChange={setCurrentView} />
+                <button
+                  onClick={handleTest}
+                  disabled={isLoading}
+                  className={`flex items-center space-x-2 bg-blue-600 px-4 py-2 rounded-lg transition-colors ${
+                    isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-700'
+                  }`}
+                >
+                  <Play className="w-4 h-4" />
+                  <span>{isLoading ? 'Testing...' : 'Test'}</span>
+                </button>
+                <button
+                  onClick={handleDeploy}
+                  disabled={isLoading}
+                  className={`flex items-center space-x-2 bg-green-600 px-4 py-2 rounded-lg transition-colors ${
+                    isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700'
+                  }`}
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>{isLoading ? 'Deploying...' : 'Deploy'}</span>
+                </button>
+              </div>
             </div>
 
             <div className="grid grid-cols-7 gap-6">
               <div className="col-span-5">
-                <CodeEditor value={code} onChange={setCode} />
+                <CodeEditorWithTabs value={code} onChange={setCode} bodyValue={body} onBodyChange={setBody}/>
               </div>
-              <div className="col-span-2 space-y-4">
+              <div className="col-span-2 h-[calc(100vh-14rem)] overflow-y-auto">
                 {currentView === 'tables' ? (
                   <>
                     <TablesSidebar

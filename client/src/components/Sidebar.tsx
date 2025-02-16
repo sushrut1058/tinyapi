@@ -1,5 +1,5 @@
 import React from 'react';
-import { Home, User, Database } from 'lucide-react';
+import { Home, List, Database, Plus, Table2} from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
 const Sidebar = () => {
@@ -10,7 +10,7 @@ const Sidebar = () => {
   return (
     <div className="w-16 bg-gray-900 h-screen fixed left-0 top-0 flex flex-col items-center py-4">
       <Link 
-        to="/"
+        to="/home"
         className={`p-3 rounded-lg mb-2 transition-colors ${
           isActive('/') ? 'bg-blue-600' : 'hover:bg-gray-800'
         }`}
@@ -18,20 +18,28 @@ const Sidebar = () => {
         <Home className="w-6 h-6 text-gray-300" />
       </Link>
       <Link 
-        to="/tables"
+        to="/tables/view"
         className={`p-3 rounded-lg mb-2 transition-colors ${
-          isActive('/tables') ? 'bg-blue-600' : 'hover:bg-gray-800'
+          isActive('/tables/view') ? 'bg-blue-600' : 'hover:bg-gray-800'
         }`}
       >
-        <Database className="w-6 h-6 text-gray-300" />
+        <Table2 className="w-6 h-6 text-gray-300" />
       </Link>
       <Link 
-        to="/profile"
-        className={`p-3 rounded-lg transition-colors ${
-          isActive('/profile') ? 'bg-blue-600' : 'hover:bg-gray-800'
+        to="/tables/create"
+        className={`p-3 rounded-lg mb-2 transition-colors ${
+          isActive('/tables/create') ? 'bg-blue-600' : 'hover:bg-gray-800'
         }`}
       >
-        <User className="w-6 h-6 text-gray-300" />
+        <Plus className="w-6 h-6 text-gray-300" />
+      </Link>
+      <Link 
+        to="/user/apis"
+        className={`p-3 rounded-lg transition-colors ${
+          isActive('/user/apis') ? 'bg-blue-600' : 'hover:bg-gray-800'
+        }`}
+      >
+        <List className="w-6 h-6 text-gray-300" />
       </Link>
     </div>
   );

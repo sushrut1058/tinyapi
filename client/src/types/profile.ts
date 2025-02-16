@@ -5,10 +5,11 @@ export interface ActivityItem {
 }
 
 export interface ApiItem {
+  name: string;
   endpoint: string;
   method: string;
-  hits: number;
-  createdAt: Date;
-  updatedAt: Date;
-  code: string;
+  // hits: number;
+  createdAt: string;
+  updatedAt: string;
+  // code: string;
 }

@@ -1,5 +1,5 @@
 from django.db import models, transaction, IntegrityError
-from django.contrib.auth.models import User
+from django.conf import settings
 import random, string
 from hashlib import md5
 from . import exceptions
@@ -13,14 +13,15 @@ def generate_unique_endpoint():
         if not Api.objects.filter(endpoint=random_endpoint).exists():
             return random_endpoint
 
-def generate_api_hash(code, method, api_data):
-    target = "CODE:"+str(code)+"\nMETHOD:"+method+"\nAPIDATA:"+api_data
+def generate_api_hash(code, method, api_data, user_id):
+    target = "CODE:"+str(code)+"\nMETHOD:"+method+"\nAPIDATA:"+api_data+"\nUSER:"+str(user_id)
     return md5(target.encode("utf-8")).hexdigest()
 
 
 class Api(models.Model):
     # name = models.CharField(max_length=255)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='apis')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='apis')
+    api_name = models.CharField(max_length=255)
     endpoint = models.CharField(max_length=255, default=generate_unique_endpoint, unique=True)
     method = models.CharField(max_length=255)
     code = models.TextField()
@@ -32,7 +33,7 @@ class Api(models.Model):
     def save(self, *args, **kwargs):
         if not self.endpoint:
             self.endpoint = generate_unique_endpoint()
-        self.api_hash = generate_api_hash(self.code, self.method, self.api_data)
+        self.api_hash = generate_api_hash(self.code, self.method, self.api_data, self.user)
         try:
             with transaction.atomic():
                 super(Api, self).save(*args, **kwargs)
@@ -42,19 +43,26 @@ class Api(models.Model):
             else:
                 raise exceptions.GenericDBException("Something went wrong")
 
-def generate_unique_tableid():
-    while True:
-        uniqueId = uuid4()
-        if not Table.objects.filter(table_uuid=uniqueId).exists():
-            return uniqueId
-
 class Table(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='tables')
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='tables')
     table_name = models.CharField(max_length=255)
     table_uuid = models.UUIDField(default=uuid4, editable=False, unique=True)
     table_columns = models.JSONField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    def save(self, *args, **kwargs):
+        if not Table.objects.filter(table_name=self.table_name).filter(user=self.user):
+            try:
+                with transaction.atomic():
+                    super(Table, self).save(*args, **kwargs)
+            except IntegrityError as e:
+                if 'unique constraint' in str(e).lower():
+                    raise e
+                else:
+                    raise exceptions.GenericDBException("Something went wrong")
+        else:
+            raise exceptions.TableDuplicateName("Duplicate table exists!")
 
     def __str__(self):
         return self.table_name

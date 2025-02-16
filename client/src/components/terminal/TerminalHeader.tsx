@@ -10,7 +10,7 @@ interface TerminalHeaderProps {
 const TerminalHeader: React.FC<TerminalHeaderProps> = ({ isMinimized, onMinimize, onClose }) => {
   return (
     <div className="bg-gray-800 px-4 py-2 flex items-center justify-between border-b border-gray-700 rounded-t-lg">
-      <span className="text-sm font-medium text-gray-300">Response Terminal</span>
+      <span className="text-sm font-medium text-gray-300">Response Window</span>
       <div className="flex items-center space-x-2">
         <button
           onClick={onMinimize}

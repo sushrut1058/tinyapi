@@ -49,7 +49,7 @@ const Profile = () => {
         />
         <Tab
           icon={<List className="w-5 h-5" />}
-          label="API List"
+          label="Deployed APIs"
           isActive={activeTab === 'apis'}
           onClick={() => setActiveTab('apis')}
         />

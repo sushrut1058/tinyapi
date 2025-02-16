@@ -7,20 +7,24 @@ import (
 	"encoding/json"
 	"log"
 	"strings"
+	"sync/atomic"
 
 	"github.com/gin-gonic/gin"
 )
 
 func ApiServe(c *gin.Context) {
-	endpoint := c.Param("random")
+	atomic.AddUint32(&data.RequestID, 1)
 
+	endpoint := c.Param("random")
 	//method
 	method := c.Request.Method
 
 	//query params
 	queryParams_raw := c.Request.URL.Query()
-	var queryParams map[string]any
+	queryParams := make(map[string]any)
+	log.Print("raw: ", queryParams_raw)
 	for query, values := range queryParams_raw {
+		log.Print("query: ", query, " values: ", values)
 		queryParams[query] = values[0]
 	}
 
@@ -31,7 +35,7 @@ func ApiServe(c *gin.Context) {
 		headers[key] = value[0]
 	}
 
-	ch := make(chan bool)
+	ch := make(chan bool, 1)
 
 	// check with db for existence
 	var (
@@ -46,14 +50,14 @@ func ApiServe(c *gin.Context) {
 		c.JSON(status, gin.H{"message": "The endpoint you're trying to access doesn't exist"})
 		return
 	}
-
+	handle := engine.GetHandle()
 	var tableDict map[string]string
 	go func() {
 		retVal := false
 		status, tableDict = db.GetTablesDict(user_id)
 		if status == 200 {
 			file := getDictFile(tableDict)
-			engine.CopyScriptToContainer(&file, engine.ContainerID)
+			handle.CopyScriptToContainer(&file, engine.ContainerID)
 			retVal = true
 		} else {
 			c.JSON(status, gin.H{"message": "Couldn't find table list"})
@@ -111,7 +115,8 @@ func ApiServe(c *gin.Context) {
 		log.Print("TableDict copying failed")
 	}
 	//fetch and engine.run() with payload
-	responseOut, responseErr := engine.Run(code, payload)
+	responseOut, responseErr := handle.Run(code, payload)
+	handle.Channel <- true
 	log.Print(responseErr)
 	status, responseJson := sanitizeResponse(responseOut)
 	//forward output
