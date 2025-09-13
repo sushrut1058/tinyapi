@@ -1,0 +1,217 @@
+2025/09/13 17:12:07 Successfully connected to the SQLite database!
+panic: Error response from daemon: Conflict. The container name "/worker" is already in use by container "caf82ca6cb50dc4de29d4f2ebe53c6f14e935b722c5402f8e3c2d54ef3e3aa7a". You have to remove (or rename) that container to be able to reuse that name.
+
+goroutine 1 [running]:
+backpocket/api-serve/engine.createEngine()
+	/home/sushrut/tinyapi/api_serve/engine/utils.go:38 +0x371
+backpocket/api-serve/engine.(*EngineHandle).Start(0xc0004408e0)
+	/home/sushrut/tinyapi/api_serve/engine/engine.go:40 +0x1c
+main.main()
+	/home/sushrut/tinyapi/api_serve/main.go:20 +0xe7
+exit status 2
+2025/09/13 17:12:33 Successfully connected to the SQLite database!
+panic: Error response from daemon: Conflict. The container name "/worker" is already in use by container "caf82ca6cb50dc4de29d4f2ebe53c6f14e935b722c5402f8e3c2d54ef3e3aa7a". You have to remove (or rename) that container to be able to reuse that name.
+
+goroutine 1 [running]:
+backpocket/api-serve/engine.createEngine()
+	/home/sushrut/tinyapi/api_serve/engine/utils.go:38 +0x371
+backpocket/api-serve/engine.(*EngineHandle).Start(0xc00044a8e0)
+	/home/sushrut/tinyapi/api_serve/engine/engine.go:40 +0x1c
+main.main()
+	/home/sushrut/tinyapi/api_serve/main.go:20 +0xe7
+exit status 2
+2025/09/13 17:13:15 Successfully connected to the SQLite database!
+panic: Error response from daemon: Conflict. The container name "/worker" is already in use by container "caf82ca6cb50dc4de29d4f2ebe53c6f14e935b722c5402f8e3c2d54ef3e3aa7a". You have to remove (or rename) that container to be able to reuse that name.
+
+goroutine 1 [running]:
+backpocket/api-serve/engine.createEngine()
+	/home/sushrut/tinyapi/api_serve/engine/utils.go:38 +0x371
+backpocket/api-serve/engine.(*EngineHandle).Start(0xc00044c8e0)
+	/home/sushrut/tinyapi/api_serve/engine/engine.go:40 +0x1c
+main.main()
+	/home/sushrut/tinyapi/api_serve/main.go:20 +0xe7
+exit status 2
+2025/09/13 17:13:55 Successfully connected to the SQLite database!
+2025/09/13 17:13:56 Container Created.
+2025/09/13 17:13:56 Container Started.
+2025/09/13 17:13:56 Container Created
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /compile                  --> backpocket/api-serve/handlers.CompileHandler (3 handlers)
+[GIN-debug] GET    /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] POST   /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PUT    /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PATCH  /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] HEAD   /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] OPTIONS /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] DELETE /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] CONNECT /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] TRACE  /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] GET    /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] POST   /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PUT    /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PATCH  /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] HEAD   /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] OPTIONS /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] DELETE /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] CONNECT /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] TRACE  /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Environment variable PORT is undefined. Using port :8080 by default
+[GIN-debug] Listening and serving HTTP on :8080
+signal: interrupt
+2025/09/13 17:14:54 Successfully connected to the SQLite database!
+2025/09/13 17:14:54 Container Created.
+2025/09/13 17:14:54 Container Started.
+2025/09/13 17:14:54 Container Created
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /compile                  --> backpocket/api-serve/handlers.CompileHandler (3 handlers)
+[GIN-debug] GET    /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] POST   /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PUT    /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PATCH  /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] HEAD   /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] OPTIONS /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] DELETE /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] CONNECT /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] TRACE  /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] GET    /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] POST   /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PUT    /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PATCH  /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] HEAD   /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] OPTIONS /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] DELETE /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] CONNECT /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] TRACE  /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Environment variable PORT is undefined. Using port :8080 by default
+[GIN-debug] Listening and serving HTTP on :8080
+Payload String:
+ {"query_params":{},"path_params":{},"method":"GET","request":{"body":null,"headers":{"Content-Type":"application/json"}}}
+{2c49b665ef80ee275abb67e3a9aebaa032f0e9f8544697fdf65cbf930474f854} 2c49b665ef80ee275abb67e3a9aebaa032f0e9f8544697fdf65cbf930474f854
+2025/09/13 17:15:05 <nil>
+2025/09/13 17:15:05 Time taken for execution: 90.704054ms
+2025/09/13 17:15:05 Error found: unexpected end of JSON input
+[GIN] 2025/09/13 - 17:15:05 | 503 |   90.986056ms |      172.18.0.3 | POST     "/compile"
+2025/09/13 17:21:29 Successfully connected to the SQLite database!
+2025/09/13 17:21:29 Container Created.
+2025/09/13 17:21:29 Container Started.
+2025/09/13 17:21:29 Container Created
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /compile                  --> backpocket/api-serve/handlers.CompileHandler (3 handlers)
+[GIN-debug] GET    /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] POST   /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PUT    /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PATCH  /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] HEAD   /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] OPTIONS /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] DELETE /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] CONNECT /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] TRACE  /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] GET    /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] POST   /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PUT    /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PATCH  /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] HEAD   /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] OPTIONS /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] DELETE /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] CONNECT /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] TRACE  /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Environment variable PORT is undefined. Using port :8080 by default
+[GIN-debug] Listening and serving HTTP on :8080
+Payload String:
+ {"query_params":{},"path_params":{},"method":"GET","request":{"body":null,"headers":{"Content-Type":"application/json"}}}
+{4d748734b4f5f795c387d5f3b06f99183f3051336867c00150c08dc16011e2e3} 4d748734b4f5f795c387d5f3b06f99183f3051336867c00150c08dc16011e2e3
+2025/09/13 17:21:37 <nil>
+2025/09/13 17:21:37 Time taken for execution: 97.394295ms
+2025/09/13 17:21:37 Error found: unexpected end of JSON input
+[GIN] 2025/09/13 - 17:21:37 | 503 |   98.111256ms |      172.18.0.3 | POST     "/compile"
+Payload String:
+ {"query_params":{},"path_params":{},"method":"GET","request":{"body":null,"headers":{"Content-Type":"application/json"}}}
+{6511660011b7ad10d7ee8f6063d5c10a91056a87a6943ee53c6c927beab58ab4} 6511660011b7ad10d7ee8f6063d5c10a91056a87a6943ee53c6c927beab58ab4
+2025/09/13 17:21:43 <nil>
+2025/09/13 17:21:43 Time taken for execution: 107.78993ms
+2025/09/13 17:21:43 Error found: unexpected end of JSON input
+[GIN] 2025/09/13 - 17:21:43 | 503 |  108.097199ms |      172.18.0.3 | POST     "/compile"
+Payload String:
+ {"query_params":{},"path_params":{},"method":"GET","request":{"body":null,"headers":{"Content-Type":"application/json"}}}
+{d094720c76fc087b7a5541e1a223130c39f1c7b82f12863bbee64112e7b32391} d094720c76fc087b7a5541e1a223130c39f1c7b82f12863bbee64112e7b32391
+2025/09/13 17:21:44 <nil>
+2025/09/13 17:21:44 Time taken for execution: 92.663055ms
+2025/09/13 17:21:44 Error found: unexpected end of JSON input
+[GIN] 2025/09/13 - 17:21:44 | 503 |   93.064416ms |      172.18.0.3 | POST     "/compile"
+2025/09/13 17:23:15 Successfully connected to the SQLite database!
+2025/09/13 17:23:15 Container Created.
+2025/09/13 17:23:15 Container Started.
+2025/09/13 17:23:15 Container Created
+[GIN-debug] [WARNING] Creating an Engine instance with the Logger and Recovery middleware already attached.
+
+[GIN-debug] [WARNING] Running in "debug" mode. Switch to "release" mode in production.
+ - using env:	export GIN_MODE=release
+ - using code:	gin.SetMode(gin.ReleaseMode)
+
+[GIN-debug] POST   /compile                  --> backpocket/api-serve/handlers.CompileHandler (3 handlers)
+[GIN-debug] GET    /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] POST   /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PUT    /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PATCH  /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] HEAD   /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] OPTIONS /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] DELETE /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] CONNECT /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] TRACE  /api/:random/*params      --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] GET    /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] POST   /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PUT    /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] PATCH  /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] HEAD   /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] OPTIONS /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] DELETE /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] CONNECT /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] TRACE  /api/:random              --> backpocket/api-serve/handlers.ApiServe (3 handlers)
+[GIN-debug] [WARNING] You trusted all proxies, this is NOT safe. We recommend you to set a value.
+Please check https://pkg.go.dev/github.com/gin-gonic/gin#readme-don-t-trust-all-proxies for details.
+[GIN-debug] Environment variable PORT is undefined. Using port :8080 by default
+[GIN-debug] Listening and serving HTTP on :8080
+[GIN-debug] [ERROR] listen tcp :8080: bind: address already in use
+2025/09/13 17:23:56 Successfully connected to the SQLite database!
+panic: Error response from daemon: Conflict. The container name "/worker" is already in use by container "ab534fbfbcff5aa54e5fd29bdb96a22dca51cec851bf8a0ee8209fb9dfee408d". You have to remove (or rename) that container to be able to reuse that name.
+
+goroutine 1 [running]:
+backpocket/api-serve/engine.createEngine()
+	/home/sushrut/tinyapi/api_serve/engine/utils.go:38 +0x371
+backpocket/api-serve/engine.(*EngineHandle).Start(0xc00043c8e0)
+	/home/sushrut/tinyapi/api_serve/engine/engine.go:40 +0x1c
+main.main()
+	/home/sushrut/tinyapi/api_serve/main.go:20 +0xe7
+exit status 2
+2025/09/13 17:24:21 Successfully connected to the SQLite database!
+panic: Error response from daemon: Conflict. The container name "/worker" is already in use by container "3aa5ec70dc2eb1e17d8b16c9ab72071506e0a6ea8da75ffaf8a65578269d2e51". You have to remove (or rename) that container to be able to reuse that name.
+
+goroutine 1 [running]:
+backpocket/api-serve/engine.createEngine()
+	/home/sushrut/tinyapi/api_serve/engine/utils.go:38 +0x371
+backpocket/api-serve/engine.(*EngineHandle).Start(0xc00043a8e0)
+	/home/sushrut/tinyapi/api_serve/engine/engine.go:40 +0x1c
+main.main()
+	/home/sushrut/tinyapi/api_serve/main.go:20 +0xe7
+exit status 2

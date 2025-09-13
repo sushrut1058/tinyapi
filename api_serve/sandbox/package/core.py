@@ -11,7 +11,7 @@ class DB:
         self.conn : sqlite3.Connection = None
 
     def connect(self):
-        self.conn = sqlite3.connect("/db/user_tables.sqlite3")
+        self.conn = sqlite3.connect("/app/db/user_tables.sqlite3")
 
     def load(self,table_name):
         self.table_name = table_name
