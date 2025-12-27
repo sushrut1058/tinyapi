@@ -39,7 +39,7 @@ export const ApiDetails: React.FC<ApiDetailsProps> = ({
         data: { message: 'Test successful' }
       }, null, 2));
     } catch (err) {
-      setError('Failed to test API. Please try again.');
+      setError('Failed to run the API. Please try again.');
     } finally {
       setIsLoading(false);
     }

@@ -124,7 +124,7 @@ const Home = () => {
     } catch (err) {
       setStatus({
         type: 'error',
-        text: 'Failed to test API. Please try again.'
+        text: 'Failed to run the API. Please try again.'
       });
     } finally {
       setIsLoading(false);
@@ -258,7 +258,7 @@ const Home = () => {
                   }`}
                 >
                   <Play className="w-4 h-4" />
-                  <span>{isLoading ? 'Testing...' : 'Test'}</span>
+                  <span>{isLoading ? 'Testing...' : 'Run'}</span>
                 </button>
                 <button
                   onClick={handleDeploy}

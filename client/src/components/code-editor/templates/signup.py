@@ -1,5 +1,4 @@
-# Nwgt7Hrp
-import re, hashlib
+import re, bcrypt
 
 class API:
     def __init__(self, db):
@@ -15,8 +14,8 @@ class API:
         # Validate inputs
         if not all([email, password, username]):
             return Response({"error": "Missing required fields"}, 400)
-        
-        # Validate username        
+
+        # Validate username
         if not re.match(r"^[a-zA-Z0-9_]+$", username):
             return Response({"error": "Invalid username format"}, 400)
 
@@ -29,16 +28,17 @@ class API:
             return Response({"error": "Password must be at least 8 characters"},400)
 
         try:
-            # Hash password
-            hashed_password = hashlib.sha256(password.encode('utf-8'))
+            # Hash password with bcrypt (secure)
+            salt = bcrypt.gensalt()
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
 
-            # Store user in database (simplified)
+            # Store user in database
             new_user = {
                 "username": username,
                 "email": email,
-                "password": hashed_password.hexdigest()
+                "password": hashed_password.decode('utf-8')  # Store as string
             }
-            status, affected_rows = self.table.insert(new_user)  # Insert data into table
+            status, affected_rows = self.table.insert(new_user)
             if status and affected_rows==1:
                 return Response({
                     "message": "User registered successfully",
@@ -46,7 +46,7 @@ class API:
                 }, 200)
             else:
                 return Response({"error":"Internal server error"}, 500)
-            
+
         except Exception as e:
             return Response({"error": str(e)}, 500)
         

@@ -84,8 +84,7 @@ const templates: Template[] = [
     id: 'user-reg',
     name: 'User Registration',
     description: 'Simple POST endpoint that registers a user',
-    code: `# Nwgt7Hrp
-import re, hashlib
+    code: `import re, bcrypt
 
 class API:
     def __init__(self, db):
@@ -101,8 +100,8 @@ class API:
         # Validate inputs
         if not all([email, password, username]):
             return Response({"error": "Missing required fields"}, 400)
-        
-        # Validate username        
+
+        # Validate username
         if not re.match(r"^[a-zA-Z0-9_]+$", username):
             return Response({"error": "Invalid username format"}, 400)
 
@@ -115,16 +114,17 @@ class API:
             return Response({"error": "Password must be at least 8 characters"},400)
 
         try:
-            # Hash password
-            hashed_password = hashlib.sha256(password.encode('utf-8'))
+            # Hash password with bcrypt (secure)
+            salt = bcrypt.gensalt()
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)
 
-            # Store user in database (simplified)
+            # Store user in database
             new_user = {
                 "username": username,
                 "email": email,
-                "password": hashed_password.hexdigest()
+                "password": hashed_password.decode('utf-8')  # Store as string
             }
-            status, affected_rows = self.table.insert(new_user)  # Insert data into table
+            status, affected_rows = self.table.insert(new_user)
             if status and affected_rows==1:
                 return Response({
                     "message": "User registered successfully",
@@ -132,7 +132,7 @@ class API:
                 }, 200)
             else:
                 return Response({"error":"Internal server error"}, 500)
-            
+
         except Exception as e:
             return Response({"error": str(e)}, 500)`,
     body: `{
@@ -149,20 +149,21 @@ class API:
   "email": "sam123@gmail.com",
   "password":"pizza123"
 }`,
-    code: `import re, hashlib, jwt, sys
+    code: `import re, bcrypt, jwt, sys, os
 from datetime import datetime, timedelta
 
 class API:
     def __init__(self, db):
         db.connect()
         self.table = db.load("Users")
-    
+
     def generate_jwt(self, email):
         """Generate a JWT for the user."""
-        secret_key = "YOUR_SECRET_KEY"  # Replace with your secret key
+        # IMPORTANT: Set this as an environment variable in production!
+        secret_key = os.environ.get("JWT_SECRET", "YOUR_SECRET_KEY_CHANGE_THIS")
         payload = {
             "email": email,
-            "exp": datetime.utcnow() + timedelta(hours=1)  # Token valid for 1 hour
+            "exp": datetime.utcnow() + timedelta(hours=1)
         }
         token = jwt.encode(payload, secret_key, algorithm="HS256")
         return token
@@ -175,7 +176,7 @@ class API:
         # Validate inputs
         if not all([email, password]):
             return Response({"error": "Missing required fields"}, 400)
-        
+
         # Validate email format
         if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
             return Response({"error": "Invalid email format"},400)
@@ -183,16 +184,23 @@ class API:
         # Validate password strength
         if len(password) < 8:
             return Response({"error": "Password must be at least 8 characters"},400)
-        
+
         try:
-            hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
-            rows = self.table.fetch({'email':email, 'password':hashed_password})
-            if len(rows)>0:
-                print(rows[0], file=sys.stderr)
+            # Fetch user by email
+            rows = self.table.fetch({'email': email})
+            if len(rows) == 0:
+                return Response({"message":"Please check your credentials"}, 401)
+
+            user = rows[0]
+            stored_password = user.get('password', '')
+
+            # Verify password with bcrypt
+            if bcrypt.checkpw(password.encode('utf-8'), stored_password.encode('utf-8')):
                 token = self.generate_jwt(email)
                 return Response({"message":{"token":token}}, 200)
             else:
                 return Response({"message":"Please check your credentials"}, 401)
+
         except Exception as e:
             print(e, file=sys.stderr)
             return Response({"error":"Something went wrong"}, 500)  `
