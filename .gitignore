@@ -2,3 +2,4 @@
 *.sqlite3
 db/
 !api_serve/db
+*__pycache__*
